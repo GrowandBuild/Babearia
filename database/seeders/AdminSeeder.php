@@ -14,7 +14,7 @@ class AdminSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@organizamais.com.br'],
             [
-                'name' => 'Val',
+                'name' => 'propietária',
                 'email' => 'admin@organizamais.com.br',
                 'password' => Hash::make('admin123'),
                 'tipo' => 'proprietaria',
@@ -33,29 +33,6 @@ class AdminSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-
-        // Profissional de exemplo (Maria)
-        $maria = User::updateOrCreate(
-            ['email' => 'maria@vidamaria.com.br'],
-            [
-                'name' => 'Maria Silva',
-                'email' => 'maria@vidamaria.com.br',
-                'password' => Hash::make('maria123'),
-                'tipo' => 'profissional',
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // Criar perfil profissional para Maria
-        if ($maria) {
-            $maria->profissional()->updateOrCreate(
-                ['user_id' => $maria->id],
-                [
-                    'telefone' => '11999887766',
-                    'percentual_comissao' => 50.0,
-                    'ativo' => true,
-                ]
-            );
-        }
+        // Apenas dona e desenvolvedor são criados neste seeder conforme solicitado.
     }
 }
