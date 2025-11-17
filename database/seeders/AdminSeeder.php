@@ -12,10 +12,10 @@ class AdminSeeder extends Seeder
     {
         // Conta da Proprietária (Val)
         User::updateOrCreate(
-            ['email' => 'val@vidamaria.com.br'],
+            ['email' => 'admin@organizamais.com.br'],
             [
                 'name' => 'Val',
-                'email' => 'val@vidamaria.com.br',
+                'email' => 'admin@organizamais.com.br',
                 'password' => Hash::make('admin123'),
                 'tipo' => 'proprietaria',
                 'email_verified_at' => now(),
