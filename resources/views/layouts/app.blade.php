@@ -837,29 +837,35 @@
         <script>
             let deferredPrompt;
             let isInstalled = false;
-            
+
+            // Flag simples em memória: mostra o modal apenas uma vez por carregamento de página
+            window.__installModalShown = window.__installModalShown || false;
+
             // Verificar se já está instalado
             if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
                 isInstalled = true;
             }
-            
+
             // Prompt de instalação automático
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                
-                // Mostrar prompt após 3 segundos se não estiver instalado
-                if (!isInstalled) {
+
+                // Mostrar prompt após 3 segundos se não estiver instalado e ainda não tenha sido mostrado nesta página
+                if (!isInstalled && !window.__installModalShown) {
                     setTimeout(() => {
                         showInstallPrompt();
                     }, 3000);
                 }
             });
-            
+
             function showInstallPrompt() {
+                if (window.__installModalShown) return; // já exibido nesta página
+
                 if (deferredPrompt && !isInstalled) {
                     // Criar modal de instalação
                     const installModal = document.createElement('div');
+                    installModal.id = '__installModal';
                     installModal.innerHTML = `
                         <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
                             <div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
@@ -877,9 +883,17 @@
                             </div>
                         </div>
                     `;
-                    
+
                     document.body.appendChild(installModal);
-                    
+
+                    // marcar como mostrado para esta página
+                    window.__installModalShown = true;
+
+                    const removeModal = () => {
+                        const node = document.getElementById('__installModal');
+                        if (node && node.parentNode) node.parentNode.removeChild(node);
+                    };
+
                     // Event listeners
                     document.getElementById('install-app-btn').addEventListener('click', async () => {
                         if (deferredPrompt) {
@@ -888,22 +902,22 @@
                             console.log('Resultado da instalação:', outcome);
                             deferredPrompt = null;
                         }
-                        document.body.removeChild(installModal);
+                        removeModal();
                     });
-                    
+
                     document.getElementById('install-later-btn').addEventListener('click', () => {
-                        document.body.removeChild(installModal);
+                        removeModal();
                     });
                 }
             }
-            
+
             // Registrar Service Worker
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('/service-worker.js')
                         .then((registration) => {
                             console.log('Service Worker registrado:', registration);
-                            
+
                             // Verificar atualizações
                             registration.addEventListener('updatefound', () => {
                                 const newWorker = registration.installing;
@@ -922,13 +936,13 @@
                         });
                 });
             }
-            
+
             // Detectar instalação
             window.addEventListener('appinstalled', () => {
                 isInstalled = true;
                 console.log('App instalado com sucesso!');
             });
-            
+
             // Sistema de notificações de sincronização
             window.addEventListener('sync-complete', (event) => {
                 const { success, count, errors } = event.detail;
@@ -938,7 +952,7 @@
                     showSyncNotification(`⚠️ ${count} itens sincronizados, ${errors} erros`, 'warning');
                 }
             });
-            
+
             function showSyncNotification(message, type) {
                 const notification = document.createElement('div');
                 notification.className = `sync-notification sync-${type}`;
@@ -965,7 +979,7 @@
                         <span>${message}</span>
                     </div>
                 `;
-                
+
                 // Adicionar animação se não existir
                 if (!document.querySelector('#sync-animations')) {
                     const style = document.createElement('style');
@@ -982,9 +996,9 @@
                     `;
                     document.head.appendChild(style);
                 }
-                
+
                 document.body.appendChild(notification);
-                
+
                 // Remover após 5 segundos com animação
                 setTimeout(() => {
                     notification.style.animation = 'slideOutRight 0.3s ease';
