@@ -3,210 +3,321 @@
 @section('title', 'Agenda')
 
 @section('content')
-<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-    <!-- Header com Filtros -->
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4 sm:mb-6">
+<div class="max-w-full mx-auto sm:px-6 lg:px-8">
+    <!-- Header com Navegação e Filtros -->
+    <div class="bg-gradient-to-r from-vm-gold to-vm-gold-600 shadow-lg mb-4 sm:mb-6 rounded-lg">
         <div class="p-4 sm:p-6">
-            <div class="flex flex-col gap-4">
-                <div class="flex-1">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Agenda de Atendimentos</h2>
-                </div>
-                
-                <form method="GET" action="{{ route('agendamentos.agenda') }}" class="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
-                    <div class="flex-1">
-                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Data</label>
-                        <input type="date" name="data" value="{{ $data }}" 
-                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-vm-gold focus:ring-vm-gold text-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <!-- Navegação de Data -->
+                <div class="flex items-center gap-3 flex-wrap">
+                    <a href="{{ route('agendamentos.agenda', ['data' => \Carbon\Carbon::parse($data)->subDay()->format('Y-m-d'), 'profissional_id' => $profissionalId]) }}" 
+                       class="p-2 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-md border-2 border-white/50">
+                        <svg class="w-5 h-5 text-vm-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <a href="{{ route('agendamentos.agenda', ['data' => today()->format('Y-m-d'), 'profissional_id' => $profissionalId]) }}" 
+                       class="px-4 py-2 bg-white hover:bg-gray-100 rounded-lg text-vm-gold font-bold transition-colors shadow-md border-2 border-white/50">
+                        Hoje
+                    </a>
+                    <a href="{{ route('agendamentos.agenda', ['data' => \Carbon\Carbon::parse($data)->addDay()->format('Y-m-d'), 'profissional_id' => $profissionalId]) }}" 
+                       class="p-2 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-md border-2 border-white/50">
+                        <svg class="w-5 h-5 text-vm-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <div class="px-4 py-2 bg-white rounded-lg shadow-md border-2 border-white/50">
+                        <input type="date" 
+                               value="{{ $data }}" 
+                               onchange="window.location.href='{{ route('agendamentos.agenda') }}?data=' + this.value + '&profissional_id={{ $profissionalId }}'"
+                               class="border-0 focus:ring-0 text-gray-900 font-bold text-sm">
                     </div>
-                    
+                    <div class="px-4 py-2 bg-white rounded-lg shadow-md border-2 border-white/50">
+                        <span class="text-vm-gold font-bold text-lg">
+                            {{ \Carbon\Carbon::parse($data)->locale('pt_BR')->translatedFormat('d M Y - l') }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Filtros e Ações -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                     @can('isProprietaria')
-                        <div class="flex-1">
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Profissional</label>
-                            <select name="profissional_id" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-vm-gold focus:ring-vm-gold text-sm">
-                                <option value="">Todos</option>
-                                @foreach($profissionais as $prof)
-                                    <option value="{{ $prof->id }}" {{ $profissionalId == $prof->id ? 'selected' : '' }}>
-                                        {{ $prof->nome }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                    <form method="GET" action="{{ route('agendamentos.agenda') }}" class="flex gap-2">
+                        <input type="hidden" name="data" value="{{ $data }}">
+                        <select name="profissional_id" 
+                                onchange="this.form.submit()"
+                                class="rounded-lg border-2 border-white/50 bg-white text-gray-900 font-semibold shadow-md px-3 py-2 focus:ring-2 focus:ring-white focus:border-white">
+                            <option value="">Todos os Profissionais</option>
+                            @foreach($profissionais as $prof)
+                                <option value="{{ $prof->id }}" {{ $profissionalId == $prof->id ? 'selected' : '' }}>
+                                    {{ $prof->nome }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
                     @endcan
                     
-                    <button type="submit" class="btn-secondary w-full sm:w-auto sm:mt-6">
-                        Filtrar
-                    </button>
-                </form>
-
-                <a href="{{ route('agendamentos.create') }}" class="btn-primary w-full sm:w-auto text-center">
-                    + Novo Agendamento
-                </a>
+                    <a href="{{ route('agendamentos.create') }}" 
+                       class="px-6 py-2 bg-white text-vm-gold font-bold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all flex items-center gap-2 border-2 border-white/50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Agendar
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Lista de Agendamentos -->
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-3 sm:p-6">
-            <div class="space-y-3 sm:space-y-4">
-                @forelse($agendamentos as $agendamento)
-                    <div class="rounded-lg p-3 sm:p-4 hover:shadow-xl transition-all duration-300 border-l-4
-                        @if($agendamento->status == 'concluido') 
-                            bg-gradient-to-r from-green-500 to-green-600 border-green-700 text-white
-                        @elseif($agendamento->status == 'pre_concluido') 
-                            bg-gradient-to-r from-orange-400 to-orange-500 border-orange-600 text-white
-                        @elseif($agendamento->status == 'agendado') 
-                            bg-gradient-to-r from-blue-500 to-blue-600 border-blue-700 text-white
-                        @else 
-                            bg-gradient-to-r from-gray-400 to-gray-500 border-gray-600 text-white
-                        @endif">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-                            <div class="flex-1">
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                                    <div class="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
-                                        {{ $agendamento->data_hora->format('H:i') }}
-                                    </div>
-                                    
-                                    <!-- Avatar do Profissional -->
-                                    <div class="flex-shrink-0">
-                                        @if($agendamento->profissional && $agendamento->profissional->user && $agendamento->profissional->user->avatar)
-                                            <img src="{{ asset('storage/' . $agendamento->profissional->user->avatar) }}" 
-                                                 alt="{{ $agendamento->profissional->nome }}" 
-                                                 class="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-lg">
-                                        @else
-                                            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center ring-2 ring-white shadow-lg">
-                                                <span class="text-white font-bold text-lg">{{ strtoupper(substr($agendamento->profissional->nome, 0, 1)) }}</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    
-                                    <div class="flex-1">
-                                        <div class="font-bold text-white text-base sm:text-lg">{{ $agendamento->nome_cliente }}</div>
-                                        @if($agendamento->servico)
-                                            <div class="text-sm sm:text-base text-white/90">{{ $agendamento->servico->nome }} - R$ {{ number_format($agendamento->servico->preco, 2, ',', '.') }}</div>
-                                        @else
-                                            <div class="text-sm sm:text-base text-white/70">Serviço não especificado</div>
-                                        @endif
-                                        <div class="flex items-center gap-2 text-xs sm:text-sm text-white/80 mt-1">
-                                            <x-avatar 
-                                                :src="$agendamento->profissional->avatar_url" 
-                                                :name="$agendamento->profissional->nome" 
-                                                size="xs" />
-                                            <span>Profissional: {{ $agendamento->profissional->nome }}</span>
-                                            @if($agendamento->servico && $agendamento->servico->duracao_minutos)
-                                                <span>• {{ $agendamento->servico->duracao_minutos }}min</span>
-                                            @endif
-                                        </div>
-                                        @if($agendamento->observacoes)
-                                            <div class="text-xs sm:text-sm text-white/80 mt-1 bg-white/10 rounded px-2 py-1 inline-block">
-                                                <strong>Obs:</strong> {{ $agendamento->observacoes }}
-                                            </div>
-                                        @endif
-                                    </div>
+    <!-- Grade de Agenda -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b-2 border-gray-300">
+                        <th class="sticky left-0 z-20 bg-gray-100 px-4 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-r-2 border-gray-300 min-w-[80px] shadow-sm">
+                            Horário
+                        </th>
+                        @php
+                            $profissionaisParaExibir = $profissionalId 
+                                ? $profissionais->where('id', $profissionalId) 
+                                : $profissionais;
+                        @endphp
+                        @foreach($profissionaisParaExibir as $prof)
+                            <th class="px-4 py-3 text-center border-r border-gray-300 min-w-[200px] bg-gray-50">
+                                <div class="flex flex-col items-center gap-2">
+                                    <x-avatar 
+                                        :src="$prof->avatar_url" 
+                                        :name="$prof->nome" 
+                                        size="md" />
+                                    <span class="text-sm font-bold text-gray-900">{{ $prof->nome }}</span>
                                 </div>
-                            </div>
+                            </th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        // Coletar todos os horários que têm agendamentos
+                        $horariosComAgendamentos = [];
+                        foreach ($agendamentos as $ag) {
+                            $horaInicio = $ag->data_hora->format('H:i');
+                            $duracao = $ag->servico ? $ag->servico->duracao_minutos : 30;
+                            $horaFim = $ag->data_hora->copy()->addMinutes($duracao)->format('H:i');
                             
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="px-3 py-1 text-xs rounded-full font-bold bg-white/20 backdrop-blur-sm text-white border border-white/30">
-                                    @if($agendamento->status == 'concluido') ✓ Confirmado
-                                    @elseif($agendamento->status == 'pre_concluido') ⏳ Pré-Concluído
-                                    @elseif($agendamento->status == 'agendado') ⏰ Agendado
-                                    @else ✕ Cancelado
-                                    @endif
-                                </span>
-                                
-                                @if($agendamento->status == 'agendado')
-                                    <a href="{{ route('agendamentos.concluir', $agendamento) }}" 
-                                       class="px-2 sm:px-3 py-1 bg-white text-green-700 text-xs font-semibold rounded hover:bg-green-50 whitespace-nowrap shadow-md">
-                                        ✓ Concluir
-                                    </a>
+                            // Adicionar horário de início
+                            if (!in_array($horaInicio, $horariosComAgendamentos)) {
+                                $horariosComAgendamentos[] = $horaInicio;
+                            }
+                            
+                            // Adicionar horários intermediários (a cada 30min)
+                            $horaAtual = \Carbon\Carbon::createFromFormat('H:i', $horaInicio);
+                            $horaFimObj = \Carbon\Carbon::createFromFormat('H:i', $horaFim);
+                            while ($horaAtual->lt($horaFimObj)) {
+                                $horaStr = $horaAtual->format('H:i');
+                                if (!in_array($horaStr, $horariosComAgendamentos)) {
+                                    $horariosComAgendamentos[] = $horaStr;
+                                }
+                                $horaAtual->addMinutes(30);
+                            }
+                        }
+                        
+                        // Se não houver agendamentos, mostrar horários padrão (9h-18h)
+                        if (empty($horariosComAgendamentos)) {
+                            for ($h = 9; $h < 18; $h++) {
+                                $horariosComAgendamentos[] = sprintf('%02d:00', $h);
+                                $horariosComAgendamentos[] = sprintf('%02d:30', $h);
+                            }
+                        } else {
+                            // Ordenar horários
+                            sort($horariosComAgendamentos);
+                            
+                            // Adicionar contexto: 1 hora antes do primeiro e 1 hora depois do último
+                            $primeiroHorario = \Carbon\Carbon::createFromFormat('H:i', $horariosComAgendamentos[0]);
+                            $ultimoHorario = \Carbon\Carbon::createFromFormat('H:i', $horariosComAgendamentos[count($horariosComAgendamentos) - 1]);
+                            
+                            $horariosComContexto = [];
+                            // Adicionar 1 hora antes
+                            $horaContexto = $primeiroHorario->copy()->subHour();
+                            for ($i = 0; $i < 2; $i++) {
+                                $horariosComContexto[] = $horaContexto->format('H:i');
+                                $horaContexto->addMinutes(30);
+                            }
+                            
+                            // Adicionar horários com agendamentos
+                            $horariosComContexto = array_merge($horariosComContexto, $horariosComAgendamentos);
+                            
+                            // Adicionar 1 hora depois
+                            $horaContexto = $ultimoHorario->copy()->addMinutes(30);
+                            for ($i = 0; $i < 2; $i++) {
+                                $horariosComContexto[] = $horaContexto->format('H:i');
+                                $horaContexto->addMinutes(30);
+                            }
+                            
+                            $horariosComAgendamentos = array_unique($horariosComContexto);
+                            sort($horariosComAgendamentos);
+                        }
+                        
+                        // Agrupar agendamentos por profissional e horário
+                        $agendamentosPorProf = [];
+                        foreach ($agendamentos as $ag) {
+                            $profId = $ag->profissional_id;
+                            if (!isset($agendamentosPorProf[$profId])) {
+                                $agendamentosPorProf[$profId] = [];
+                            }
+                            $agendamentosPorProf[$profId][] = $ag;
+                        }
+                    @endphp
+                    
+                    @foreach($horariosComAgendamentos as $horario)
+                        @php
+                            // Verificar se este horário tem algum agendamento em qualquer profissional
+                            $temAgendamento = false;
+                            foreach ($profissionaisParaExibir as $prof) {
+                                $ag = collect($agendamentosPorProf[$prof->id] ?? [])
+                                    ->first(function($ag) use ($horario) {
+                                        $horaAgendamento = $ag->data_hora->format('H:i');
+                                        $duracao = $ag->servico ? $ag->servico->duracao_minutos : 30;
+                                        $horaFim = $ag->data_hora->copy()->addMinutes($duracao)->format('H:i');
+                                        
+                                        // Verificar se o horário está dentro do intervalo do agendamento
+                                        return $horaAgendamento <= $horario && $horario < $horaFim;
+                                    });
+                                if ($ag) {
+                                    $temAgendamento = true;
+                                    break;
+                                }
+                            }
+                            
+                            // Altura da linha: 30px se estiver vazia (mais compacta), 60px se tiver agendamento
+                            $alturaLinha = $temAgendamento ? 60 : 30;
+                        @endphp
+                        <tr class="border-b border-gray-200 {{ $temAgendamento ? 'hover:bg-gray-50 bg-white' : 'bg-gray-50/50' }} transition-colors">
+                            <td class="sticky left-0 z-10 {{ $temAgendamento ? 'bg-white' : 'bg-gray-50/50' }} px-4 py-2 text-sm font-bold text-gray-900 border-r-2 border-gray-300 shadow-sm">
+                                {{ $horario }}
+                            </td>
+                            @foreach($profissionaisParaExibir as $prof)
+                                <td class="px-2 py-1 border-r border-gray-200 relative {{ $temAgendamento ? 'bg-white' : 'bg-gray-50/50' }}" style="height: {{ $alturaLinha }}px;">
+                                    @php
+                                        // Encontrar agendamento que começa neste horário
+                                        $agendamentoPrincipal = collect($agendamentosPorProf[$prof->id] ?? [])
+                                            ->first(function($ag) use ($horario) {
+                                                $horaAgendamento = $ag->data_hora->format('H:i');
+                                                return $horaAgendamento == $horario;
+                                            });
+                                    @endphp
                                     
-                                    @can('isProprietaria')
-                                        <a href="{{ route('agendamentos.edit', $agendamento) }}" 
-                                           class="px-2 sm:px-3 py-1 bg-white text-blue-700 text-xs font-semibold rounded hover:bg-blue-50 whitespace-nowrap shadow-md">
-                                            ✎ Editar
-                                        </a>
-                                        
-                                        <form method="POST" action="{{ route('agendamentos.deletar', $agendamento) }}" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Deseja realmente cancelar?')"
-                                                    class="px-2 sm:px-3 py-1 bg-white text-red-700 text-xs font-semibold rounded hover:bg-red-50 whitespace-nowrap shadow-md">
-                                                ✕
-                                            </button>
-                                        </form>
-                                    @endcan
-                                @endif
-                                
-                                @if($agendamento->status == 'pre_concluido')
-                                    @can('isProprietaria')
-                                        <form method="POST" action="{{ route('agendamentos.confirmar', $agendamento) }}" class="inline">
-                                            @csrf
-                                            <button type="submit" 
-                                                    class="px-2 sm:px-3 py-1 bg-white text-green-700 text-xs font-semibold rounded hover:bg-green-50 whitespace-nowrap shadow-md">
-                                                ✓ Confirmar
-                                            </button>
-                                        </form>
-                                        
-                                        <form method="POST" action="{{ route('agendamentos.deletar', $agendamento) }}" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Cancelar e estornar este atendimento?')"
-                                                    class="px-2 sm:px-3 py-1 bg-white text-red-700 text-xs font-semibold rounded hover:bg-red-50 whitespace-nowrap shadow-md">
-                                                ✕ Cancelar
-                                            </button>
-                                        </form>
-                                    @endcan
-                                @endif
-                                
-                                @if($agendamento->status == 'concluido')
-                                    @can('isProprietaria')
-                                        <form method="POST" action="{{ route('agendamentos.deletar', $agendamento) }}" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('ATENÇÃO: Cancelar este agendamento irá REMOVER os pagamentos registrados e ALTERAR os valores financeiros. Deseja realmente continuar?')"
-                                                    class="px-2 sm:px-3 py-1 bg-white text-orange-700 text-xs font-semibold rounded hover:bg-orange-50 whitespace-nowrap shadow-md">
-                                                <span class="hidden sm:inline">↩ Cancelar e Estornar</span>
-                                                <span class="sm:hidden">↩ Estornar</span>
-                                            </button>
-                                        </form>
-                                    @endcan
-                                @endif
+                                    @if($agendamentoPrincipal)
+                                        @php
+                                            $duracao = $agendamentoPrincipal->servico ? $agendamentoPrincipal->servico->duracao_minutos : 30;
+                                            // Calcular quantos slots de 30min o agendamento ocupa
+                                            $slots = max(1, ceil($duracao / 30));
+                                            
+                                            // Calcular altura: considerar que linhas vazias têm 30px e linhas com agendamento têm 60px
+                                            // Mas para simplificar, vamos usar 60px por slot quando há agendamento
+                                            $alturaTotal = ($slots * 60) - 8; // 60px por slot, menos 8px de margem
+                                            $coresStatus = match($agendamentoPrincipal->status) {
+                                                'concluido' => [
+                                                    'bg' => 'bg-green-600',
+                                                    'text' => 'text-white',
+                                                    'border' => 'border-green-700'
+                                                ],
+                                                'pre_concluido' => [
+                                                    'bg' => 'bg-orange-500',
+                                                    'text' => 'text-white',
+                                                    'border' => 'border-orange-600'
+                                                ],
+                                                'agendado' => [
+                                                    'bg' => 'bg-blue-600',
+                                                    'text' => 'text-white',
+                                                    'border' => 'border-blue-700'
+                                                ],
+                                                default => [
+                                                    'bg' => 'bg-gray-500',
+                                                    'text' => 'text-white',
+                                                    'border' => 'border-gray-600'
+                                                ]
+                                            };
+                                        @endphp
+                                        <div class="absolute top-1 left-1 right-1 rounded-lg shadow-xl border-2 {{ $coresStatus['bg'] }} {{ $coresStatus['text'] }} {{ $coresStatus['border'] }} p-2 overflow-hidden cursor-pointer hover:shadow-2xl hover:scale-[1.02] transition-all group"
+                                             style="height: {{ $alturaTotal }}px; z-index: 5;"
+                                             onclick="window.location.href='{{ route('agendamentos.edit', $agendamentoPrincipal) }}'"
+                                             title="{{ $agendamentoPrincipal->nome_cliente }} - {{ $agendamentoPrincipal->servico ? $agendamentoPrincipal->servico->nome : 'Serviço' }}">
+                                            <div class="flex flex-col h-full">
+                                                <div class="font-bold text-xs sm:text-sm truncate drop-shadow-md" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                                                    {{ strtoupper(substr($agendamentoPrincipal->nome_cliente, 0, 20)) }}
+                                                </div>
+                                                <div class="text-xs font-semibold mt-1 drop-shadow-md" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                                                    {{ $agendamentoPrincipal->data_hora->format('H:i') }} - {{ $agendamentoPrincipal->data_hora->copy()->addMinutes($duracao)->format('H:i') }}
+                                                </div>
+                                                @if($agendamentoPrincipal->servico)
+                                                    <div class="text-xs font-medium mt-1 truncate drop-shadow-md" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                                                        {{ $agendamentoPrincipal->servico->nome }}
+                                                    </div>
+                                                @endif
+                                                <div class="flex items-center gap-1 mt-auto">
+                                                    @if($agendamentoPrincipal->status == 'agendado')
+                                                        <span class="text-xs bg-white/30 backdrop-blur-sm px-2 py-0.5 rounded font-semibold border border-white/40">⏰</span>
+                                                    @elseif($agendamentoPrincipal->status == 'pre_concluido')
+                                                        <span class="text-xs bg-white/30 backdrop-blur-sm px-2 py-0.5 rounded font-semibold border border-white/40">⏳</span>
+                                                    @elseif($agendamentoPrincipal->status == 'concluido')
+                                                        <span class="text-xs bg-white/30 backdrop-blur-sm px-2 py-0.5 rounded font-semibold border border-white/40">✓</span>
+                                                    @endif
+                                                    <span class="text-xs font-semibold ml-auto drop-shadow-md" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                                                        {{ $duracao }}min
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-                                @if($agendamento->status == 'cancelado' || $agendamento->status == 'concluido')
-                                    @can('isProprietaria')
-                                        <form method="POST" action="{{ route('agendamentos.deletar', $agendamento) }}" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('ATENÇÃO: Esta ação é IRREVERSÍVEL! O agendamento será DELETADO PERMANENTEMENTE do banco de dados. Deseja realmente continuar?')"
-                                                    class="px-2 sm:px-3 py-1 bg-white text-red-700 text-xs font-semibold rounded hover:bg-red-50 whitespace-nowrap shadow-md">
-                                                🗑️ <span class="hidden sm:inline">Deletar</span>
-                                            </button>
-                                        </form>
-                                    @endcan
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum agendamento</h3>
-                        <p class="mt-1 text-sm text-gray-500">Não há agendamentos para esta data.</p>
-                        @can('isProprietaria')
-                            <div class="mt-6">
-                                <a href="{{ route('agendamentos.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                                    + Novo Agendamento
-                                </a>
-                            </div>
-                        @endcan
-                    </div>
-                @endforelse
+    <!-- Legenda -->
+    <div class="mt-4 bg-white rounded-lg shadow-md p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <span class="text-sm font-semibold text-gray-700">Legenda:</span>
+            <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-blue-500 rounded"></div>
+                <span class="text-sm text-gray-600">Agendado</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-orange-500 rounded"></div>
+                <span class="text-sm text-gray-600">Pré-Concluído</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-green-500 rounded"></div>
+                <span class="text-sm text-gray-600">Concluído</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-gray-400 rounded"></div>
+                <span class="text-sm text-gray-600">Cancelado</span>
             </div>
         </div>
     </div>
 </div>
-@endsection
 
+<style>
+    /* Scrollbar personalizada */
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 8px;
+    }
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: #D4AF37;
+        border-radius: 4px;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: #B8941F;
+    }
+</style>
+@endsection

@@ -65,6 +65,9 @@ Route::middleware('auth')->group(function () {
 
     // Agendamentos (todos podem acessar)
     Route::get('/agenda', [AgendamentoController::class, 'agenda'])->name('agendamentos.agenda');
+    Route::get('/agendar', [AgendamentoController::class, 'autoAgendar'])->name('agendamentos.auto-agendar');
+    Route::post('/agendar', [AgendamentoController::class, 'storeAutoAgendamento'])->name('agendamentos.store-auto');
+    Route::post('/api/horarios-disponiveis', [AgendamentoController::class, 'horariosDisponiveis'])->name('api.horarios-disponiveis');
     Route::resource('agendamentos', AgendamentoController::class)->except(['destroy']);
     Route::get('/agendamentos/{agendamento}/concluir', [AgendamentoController::class, 'concluir'])->name('agendamentos.concluir');
     Route::post('/agendamentos/{agendamento}/finalizar', [AgendamentoController::class, 'finalizarPagamento'])->name('agendamentos.finalizar');
@@ -86,6 +89,10 @@ Route::middleware('auth')->group(function () {
         
         Route::resource('servicos', ServicoController::class);
         Route::post('/servicos/{servico}/toggle', [ServicoController::class, 'toggleStatus'])->name('servicos.toggle');
+
+        // Dashboard de Agenda (admin) - visão tipo "colunas por profissional"
+        Route::get('/admin/agenda', [App\Http\Controllers\AdminAgendaController::class, 'index'])->name('admin.agenda');
+        Route::get('/admin/agenda/events', [App\Http\Controllers\AdminAgendaController::class, 'events'])->name('admin.agenda.events');
         
         Route::get('/formas-pagamento', [FormaPagamentoController::class, 'index'])->name('formas-pagamento.index');
         Route::get('/formas-pagamento/create', [FormaPagamentoController::class, 'create'])->name('formas-pagamento.create');

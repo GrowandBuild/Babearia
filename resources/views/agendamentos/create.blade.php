@@ -164,10 +164,12 @@
         if (clienteSelect.value === '') {
             clienteAvulsoDiv.style.display = 'block';
             clienteAvulsoInput.required = true;
+            clienteAvulsoInput.disabled = false;
         } else {
             clienteAvulsoDiv.style.display = 'none';
             clienteAvulsoInput.required = false;
             clienteAvulsoInput.value = '';
+            clienteAvulsoInput.disabled = true;
         }
     }
     

@@ -72,13 +72,28 @@ class AgendamentoController extends Controller
 
     public function store(Request $request)
     {
+        // Converter string vazia para null no cliente_id
+        if ($request->cliente_id === '' || $request->cliente_id === null) {
+            $request->merge(['cliente_id' => null]);
+        }
+        
+        // Se cliente_id está preenchido, remover cliente_avulso
+        if ($request->cliente_id) {
+            $request->merge(['cliente_avulso' => null]);
+        } else {
+            // Se cliente_id está vazio, converter string vazia de cliente_avulso para null
+            if ($request->cliente_avulso === '') {
+                $request->merge(['cliente_avulso' => null]);
+            }
+        }
+        
         $validated = $request->validate([
-            'profissional_id' => 'required|exists:profissionais,id',
-            'servico_id' => 'required|exists:servicos,id',
+            'profissional_id' => 'required|integer|exists:profissionais,id',
+            'servico_id' => 'required|integer|exists:servicos,id',
             'data' => 'required|date',
             'hora' => 'required',
-            'cliente_id' => 'nullable|exists:clientes,id',
-            'cliente_avulso' => 'required_without:cliente_id|string|max:255',
+            'cliente_id' => 'nullable|integer|exists:clientes,id',
+            'cliente_avulso' => 'required_without:cliente_id|nullable|string|max:255',
             'observacoes' => 'nullable|string',
         ]);
 
@@ -113,13 +128,28 @@ class AgendamentoController extends Controller
 
     public function update(Request $request, Agendamento $agendamento)
     {
+        // Converter string vazia para null no cliente_id
+        if ($request->cliente_id === '' || $request->cliente_id === null) {
+            $request->merge(['cliente_id' => null]);
+        }
+        
+        // Se cliente_id está preenchido, remover cliente_avulso
+        if ($request->cliente_id) {
+            $request->merge(['cliente_avulso' => null]);
+        } else {
+            // Se cliente_id está vazio, converter string vazia de cliente_avulso para null
+            if ($request->cliente_avulso === '') {
+                $request->merge(['cliente_avulso' => null]);
+            }
+        }
+        
         $validated = $request->validate([
-            'profissional_id' => 'required|exists:profissionais,id',
-            'servico_id' => 'required|exists:servicos,id',
+            'profissional_id' => 'required|integer|exists:profissionais,id',
+            'servico_id' => 'required|integer|exists:servicos,id',
             'data' => 'required|date',
             'hora' => 'required',
-            'cliente_id' => 'nullable|exists:clientes,id',
-            'cliente_avulso' => 'required_without:cliente_id|string|max:255',
+            'cliente_id' => 'nullable|integer|exists:clientes,id',
+            'cliente_avulso' => 'required_without:cliente_id|nullable|string|max:255',
             'observacoes' => 'nullable|string',
         ]);
 
@@ -276,6 +306,268 @@ class AgendamentoController extends Controller
 
         return redirect()->route('agendamentos.agenda')
             ->with('success', 'Atendimento confirmado com sucesso!');
+    }
+
+    public function autoAgendar()
+    {
+        $profissionais = Profissional::where('ativo', true)->get();
+        $servicos = Servico::where('ativo', true)->get();
+        
+        return view('agendamentos.auto-agendar', compact('profissionais', 'servicos'));
+    }
+
+    public function horariosDisponiveis(Request $request)
+    {
+        $request->validate([
+            'profissional_id' => 'required|exists:profissionais,id',
+            'servico_id' => 'required|exists:servicos,id',
+            'data' => 'required|date',
+            'hora_desejada' => 'required',
+        ]);
+
+        $profissionalId = $request->profissional_id;
+        $servicoId = $request->servico_id;
+        $data = $request->data;
+        $horaDesejada = $request->hora_desejada;
+
+        $servico = Servico::find($servicoId);
+        $duracao = $servico->duracao_minutos ?? 30;
+
+        // Buscar agendamentos do profissional na data
+        $agendamentos = Agendamento::where('profissional_id', $profissionalId)
+            ->whereDate('data_hora', $data)
+            ->where('status', '!=', 'cancelado')
+            ->with('servicos')
+            ->get();
+
+        // Criar array de intervalos ocupados (início e fim)
+        $intervalosOcupados = [];
+        foreach ($agendamentos as $ag) {
+            $horaInicio = \Carbon\Carbon::parse($ag->data_hora);
+            $duracaoAg = 0;
+            foreach ($ag->servicos as $s) {
+                $duracaoAg += $s->duracao_minutos ?? 30;
+            }
+            if ($duracaoAg == 0) $duracaoAg = 30;
+            
+            $horaFim = $horaInicio->copy()->addMinutes($duracaoAg);
+            
+            $intervalosOcupados[] = [
+                'inicio' => $horaInicio,
+                'fim' => $horaFim
+            ];
+        }
+
+        // Verificar se horário desejado está disponível
+        // Garantir formato correto da hora (HH:MM)
+        $horaFormatada = strlen($horaDesejada) == 5 ? $horaDesejada : sprintf('%02d:%02d', ...explode(':', $horaDesejada));
+        $horaDesejadaObj = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "$data $horaFormatada:00");
+        $horaFimDesejada = $horaDesejadaObj->copy()->addMinutes($duracao);
+        
+        // Verificar sobreposição com agendamentos existentes
+        $disponivel = true;
+        foreach ($intervalosOcupados as $intervalo) {
+            // Verificar se há sobreposição: 
+            // Novo agendamento começa antes do fim do existente E termina depois do início do existente
+            // OU começa exatamente no mesmo horário
+            // OU termina exatamente no mesmo horário
+            if (($horaDesejadaObj->lt($intervalo['fim']) && $horaFimDesejada->gt($intervalo['inicio'])) ||
+                $horaDesejadaObj->eq($intervalo['inicio']) ||
+                ($horaDesejadaObj->gte($intervalo['inicio']) && $horaDesejadaObj->lt($intervalo['fim'])) ||
+                ($horaFimDesejada->gt($intervalo['inicio']) && $horaFimDesejada->lte($intervalo['fim']))) {
+                $disponivel = false;
+                break;
+            }
+        }
+
+        $sugestoes = [];
+        if (!$disponivel) {
+            // Buscar próximo horário disponível (depois)
+            $horaSugerida = $horaFimDesejada->copy();
+            $tentativas = 0;
+            while ($tentativas < 40 && $horaSugerida->format('H:i') <= '20:00') { // Máximo até 20h
+                $horaFimSugestao = $horaSugerida->copy()->addMinutes($duracao);
+                
+                $disponivelSugestao = true;
+                foreach ($intervalosOcupados as $intervalo) {
+                    if ($horaSugerida->lt($intervalo['fim']) && $horaFimSugestao->gt($intervalo['inicio'])) {
+                        $disponivelSugestao = false;
+                        break;
+                    }
+                }
+                
+                if ($disponivelSugestao) {
+                    $sugestoes[] = [
+                        'hora' => $horaSugerida->format('H:i'),
+                        'tipo' => 'proximo'
+                    ];
+                    break;
+                }
+                
+                $horaSugerida->addMinutes(30);
+                $tentativas++;
+            }
+
+            // Buscar horário anterior disponível (antes)
+            $horaSugerida = $horaDesejadaObj->copy()->subMinutes(30);
+            $tentativas = 0;
+            while ($tentativas < 40 && $horaSugerida->format('H:i') >= '09:00') {
+                $horaFimSugestao = $horaSugerida->copy()->addMinutes($duracao);
+                
+                $disponivelSugestao = true;
+                foreach ($intervalosOcupados as $intervalo) {
+                    if ($horaSugerida->lt($intervalo['fim']) && $horaFimSugestao->gt($intervalo['inicio'])) {
+                        $disponivelSugestao = false;
+                        break;
+                    }
+                }
+                
+                if ($disponivelSugestao) {
+                    $sugestoes[] = [
+                        'hora' => $horaSugerida->format('H:i'),
+                        'tipo' => 'anterior'
+                    ];
+                    break;
+                }
+                
+                $horaSugerida->subMinutes(30);
+                $tentativas++;
+            }
+        }
+
+        return response()->json([
+            'disponivel' => $disponivel,
+            'sugestoes' => $sugestoes
+        ]);
+    }
+
+    public function storeAutoAgendamento(Request $request)
+    {
+        $validated = $request->validate([
+            'profissional_id' => 'required|integer|exists:profissionais,id',
+            'servico_id' => 'required|integer|exists:servicos,id',
+            'data' => 'required|date',
+            'hora' => 'required',
+            'cliente_avulso' => 'required|string|max:255',
+            'observacoes' => 'nullable|string',
+        ]);
+
+        // Verificar se horário está disponível
+        $horarioDisponivel = $this->verificarHorarioDisponivel(
+            $validated['profissional_id'],
+            $validated['data'],
+            $validated['hora'],
+            $validated['servico_id']
+        );
+
+        if (!$horarioDisponivel['disponivel']) {
+            return back()->withErrors([
+                'hora' => 'Este horário não está disponível. ' . 
+                         ($horarioDisponivel['sugestao'] ? 'Sugestão: ' . $horarioDisponivel['sugestao'] : '')
+            ])->withInput();
+        }
+
+        // Converter string vazia para null no cliente_id
+        $request->merge(['cliente_id' => null]);
+
+        // Combinar data e hora
+        $validated['data_hora'] = $validated['data'] . ' ' . $validated['hora'];
+        
+        // Separar dados do agendamento e do serviço
+        $servicoId = $validated['servico_id'];
+        unset($validated['data'], $validated['hora'], $validated['servico_id']);
+
+        // Criar agendamento
+        $agendamento = Agendamento::create($validated);
+        
+        // Vincular serviço na tabela pivot
+        $servico = Servico::find($servicoId);
+        $agendamento->servicos()->attach($servicoId, [
+            'preco_cobrado' => $servico->preco
+        ]);
+
+        return redirect()->route('agendamentos.agenda')
+            ->with('success', 'Agendamento criado com sucesso!');
+    }
+
+    private function verificarHorarioDisponivel($profissionalId, $data, $hora, $servicoId)
+    {
+        $servico = Servico::find($servicoId);
+        $duracao = $servico->duracao_minutos ?? 30;
+
+        $agendamentos = Agendamento::where('profissional_id', $profissionalId)
+            ->whereDate('data_hora', $data)
+            ->where('status', '!=', 'cancelado')
+            ->with('servicos')
+            ->get();
+
+        // Criar array de intervalos ocupados
+        $intervalosOcupados = [];
+        foreach ($agendamentos as $ag) {
+            $horaInicio = \Carbon\Carbon::parse($ag->data_hora);
+            $duracaoAg = 0;
+            foreach ($ag->servicos as $s) {
+                $duracaoAg += $s->duracao_minutos ?? 30;
+            }
+            if ($duracaoAg == 0) $duracaoAg = 30;
+            
+            $horaFim = $horaInicio->copy()->addMinutes($duracaoAg);
+            
+            $intervalosOcupados[] = [
+                'inicio' => $horaInicio,
+                'fim' => $horaFim
+            ];
+        }
+
+        // Garantir formato correto da hora (HH:MM)
+        $horaFormatada = strlen($hora) == 5 ? $hora : sprintf('%02d:%02d', ...explode(':', $hora));
+        $horaDesejadaObj = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "$data $horaFormatada:00");
+        $horaFimDesejada = $horaDesejadaObj->copy()->addMinutes($duracao);
+        
+        // Verificar sobreposição
+        $disponivel = true;
+        foreach ($intervalosOcupados as $intervalo) {
+            // Verificar se há sobreposição: 
+            // Novo agendamento começa antes do fim do existente E termina depois do início do existente
+            // OU começa exatamente no mesmo horário
+            // OU termina exatamente no mesmo horário
+            if (($horaDesejadaObj->lt($intervalo['fim']) && $horaFimDesejada->gt($intervalo['inicio'])) ||
+                $horaDesejadaObj->eq($intervalo['inicio']) ||
+                ($horaDesejadaObj->gte($intervalo['inicio']) && $horaDesejadaObj->lt($intervalo['fim'])) ||
+                ($horaFimDesejada->gt($intervalo['inicio']) && $horaFimDesejada->lte($intervalo['fim']))) {
+                $disponivel = false;
+                break;
+            }
+        }
+
+        $sugestao = null;
+        if (!$disponivel) {
+            // Buscar próximo disponível
+            $horaSugerida = $horaFimDesejada->copy();
+            for ($i = 0; $i < 40 && $horaSugerida->format('H:i') <= '20:00'; $i++) {
+                $horaFimSugestao = $horaSugerida->copy()->addMinutes($duracao);
+                
+                $disponivelSugestao = true;
+                foreach ($intervalosOcupados as $intervalo) {
+                    if ($horaSugerida->lt($intervalo['fim']) && $horaFimSugestao->gt($intervalo['inicio'])) {
+                        $disponivelSugestao = false;
+                        break;
+                    }
+                }
+                
+                if ($disponivelSugestao) {
+                    $sugestao = $horaSugerida->format('H:i');
+                    break;
+                }
+                
+                $horaSugerida->addMinutes(30);
+            }
+        }
+
+        return [
+            'disponivel' => $disponivel,
+            'sugestao' => $sugestao
+        ];
     }
 }
 

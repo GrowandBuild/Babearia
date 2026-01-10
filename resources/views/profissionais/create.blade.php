@@ -18,6 +18,7 @@
                             <div id="preview-container" class="hidden">
                                 <x-avatar 
                                     id="avatar-preview"
+                                    name="Novo Profissional"
                                     size="2xl" />
                             </div>
                             <div class="flex-1">
