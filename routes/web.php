@@ -68,10 +68,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/agendar', [AgendamentoController::class, 'autoAgendar'])->name('agendamentos.auto-agendar');
     Route::post('/agendar', [AgendamentoController::class, 'storeAutoAgendamento'])->name('agendamentos.store-auto');
     Route::post('/api/horarios-disponiveis', [AgendamentoController::class, 'horariosDisponiveis'])->name('api.horarios-disponiveis');
+    Route::post('/api/horarios-disponiveis-dia', [AgendamentoController::class, 'horariosDisponiveisDia'])->name('api.horarios-disponiveis-dia');
     Route::resource('agendamentos', AgendamentoController::class)->except(['destroy']);
     Route::get('/agendamentos/{agendamento}/concluir', [AgendamentoController::class, 'concluir'])->name('agendamentos.concluir');
     Route::post('/agendamentos/{agendamento}/finalizar', [AgendamentoController::class, 'finalizarPagamento'])->name('agendamentos.finalizar');
     Route::post('/agendamentos/{agendamento}/confirmar', [AgendamentoController::class, 'confirmarConclusao'])->name('agendamentos.confirmar')->middleware(['can:isProprietaria', 'financial.security']);
+    Route::post('/agendamentos/{agendamento}/cancelar', [AgendamentoController::class, 'cancelar'])->name('agendamentos.cancelar');
     Route::delete('/agendamentos/{agendamento}/deletar', [AgendamentoController::class, 'deletarCompletamente'])->name('agendamentos.deletar')->middleware(['can:isProprietaria', 'financial.security']);
 
     // Clientes (todos podem ver e criar - para facilitar cadastro rápido)
@@ -86,6 +88,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/clientes/{cliente}/edit', [ClienteController::class, 'edit'])->name('clientes.edit');
         Route::put('/clientes/{cliente}', [ClienteController::class, 'update'])->name('clientes.update');
         Route::delete('/clientes/{cliente}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
+        Route::get('/clientes/{cliente}/create-access', [ClienteController::class, 'createAccess'])->name('clientes.create-access');
+        Route::post('/clientes/{cliente}/store-access', [ClienteController::class, 'storeAccess'])->name('clientes.store-access');
+        Route::get('/clientes/{cliente}/edit-access', [ClienteController::class, 'editAccess'])->name('clientes.edit-access');
+        Route::put('/clientes/{cliente}/update-access', [ClienteController::class, 'updateAccess'])->name('clientes.update-access');
+        Route::post('/clientes/{cliente}/update-avatar', [ClienteController::class, 'updateAvatar'])->name('clientes.update-avatar');
         
         Route::resource('servicos', ServicoController::class);
         Route::post('/servicos/{servico}/toggle', [ServicoController::class, 'toggleStatus'])->name('servicos.toggle');

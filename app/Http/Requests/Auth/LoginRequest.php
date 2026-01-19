@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'login' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -41,11 +41,34 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $loginField = $this->input('login');
+        $password = $this->input('password');
+        $remember = $this->boolean('remember');
+
+        // Determine the field type and find the user
+        $user = null;
+        $field = 'email';
+
+        if (filter_var($loginField, FILTER_VALIDATE_EMAIL)) {
+            // It's an email
+            $field = 'email';
+            $user = \App\Models\User::where('email', $loginField)->first();
+        } elseif (preg_match('/^[0-9]{10,15}$/', preg_replace('/[^0-9]/', '', $loginField))) {
+            // It's a phone number (remove non-numeric characters first)
+            $field = 'phone';
+            $cleanPhone = preg_replace('/[^0-9]/', '', $loginField);
+            $user = \App\Models\User::where('phone', 'like', '%' . $cleanPhone . '%')->first();
+        } else {
+            // It's a username
+            $field = 'username';
+            $user = \App\Models\User::where('username', $loginField)->first();
+        }
+
+        if (! $user || ! Auth::attempt([$field => $user->$field, 'password' => $password], $remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'login' => trans('auth.failed'),
             ]);
         }
 
@@ -80,6 +103,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->input('login')).'|'.$this->ip());
     }
 }

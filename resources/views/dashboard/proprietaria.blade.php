@@ -7,64 +7,67 @@
     <!-- Filtro de Período -->
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4 sm:mb-6 mx-4 sm:mx-0">
         <div class="p-4 sm:p-6">
-            <form method="GET" action="{{ route('dashboard') }}" class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <div class="flex-1">
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Data Início</label>
-                    <input type="date" name="data_inicio" value="{{ $dataInicio }}" 
-                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-vm-gold focus:ring-vm-gold text-sm">
+            <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-2">
+                <label for="data_inicio" class="sr-only">Data Início</label>
+                <div class="flex items-center gap-2">
+                    <input id="data_inicio" type="date" name="data_inicio" value="{{ $dataInicio }}"
+                           class="px-3 py-2 text-sm rounded-md border border-gray-300 focus:ring-1 focus:ring-offset-0 focus:ring-offset-white focus:ring-var sm:text-sm"
+                           style="width:150px">
+                    <input id="data_fim" type="date" name="data_fim" value="{{ $dataFim }}"
+                           class="px-3 py-2 text-sm rounded-md border border-gray-300 focus:ring-1 focus:ring-offset-0 focus:ring-offset-white focus:ring-var sm:text-sm"
+                           style="width:150px">
                 </div>
-                <div class="flex-1">
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-                    <input type="date" name="data_fim" value="{{ $dataFim }}" 
-                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-vm-gold focus:ring-vm-gold text-sm">
-                </div>
-                <button type="submit" class="btn-primary w-full sm:w-auto sm:mt-5">
-                    Filtrar Período
+
+                <button type="submit" class="ml-2 inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold shadow-sm" style="background: var(--brand-btn-primary-bg); color: var(--brand-btn-primary-text);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"></path></svg>
+                    Filtrar
                 </button>
+
+                <a href="{{ route('dashboard') }}" class="ml-1 text-xs text-gray-500 hover:underline">Limpar</a>
             </form>
         </div>
     </div>
 
     <!-- Cards Resumo -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6 px-4 sm:px-0">
-        <!-- Total da Empresa (Confirmado) -->
-        <div class="bg-gradient-to-br from-green-500 to-green-600 overflow-hidden shadow-lg rounded-lg">
-            <div class="p-4 sm:p-6 text-white">
-                <div class="text-xs sm:text-sm font-semibold uppercase">Confirmado</div>
-                <div class="mt-2 text-2xl sm:text-4xl font-bold">R$ {{ number_format($totalEmpresa, 2, ',', '.') }}</div>
-                <div class="mt-1 sm:mt-2 text-xs opacity-80">Parte da empresa</div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 px-2 sm:px-0">
+        {{-- Compact financial cards: smaller, denser, modern --}}
+        <div class="flex items-center gap-3 p-3 rounded-lg shadow-sm" style="background: rgba(34,197,94,0.06); border-left: 4px solid var(--brand-success);">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(34,197,94,0.15);">
+                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3h14v4H3zM3 9h10v8H3z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-gray-600">Confirmado</div>
+                <div class="mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($totalEmpresa, 2, ',', '.') }}</div>
             </div>
         </div>
 
-        <!-- Pendente de Confirmação -->
-        <div class="bg-gradient-to-br from-orange-400 to-orange-500 overflow-hidden shadow-lg rounded-lg">
-            <div class="p-4 sm:p-6 text-white">
-                <div class="text-xs sm:text-sm font-semibold uppercase flex items-center gap-1">
-                    Aguardando
-                    @if($agendamentosPendentes > 0)
-                        <span class="bg-white text-orange-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">{{ $agendamentosPendentes }}</span>
-                    @endif
-                </div>
-                <div class="mt-2 text-2xl sm:text-4xl font-bold">R$ {{ number_format($totalPreConcluido, 2, ',', '.') }}</div>
-                <div class="mt-1 sm:mt-2 text-xs opacity-80">A confirmar</div>
+        <div class="flex items-center gap-3 p-3 rounded-lg shadow-sm" style="background: rgba(250,130,49,0.04); border-left: 4px solid var(--brand-warning);">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(250,130,49,0.12);">
+                <svg class="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-gray-600">Aguardando</div>
+                <div class="mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($totalPreConcluido, 2, ',', '.') }} @if($agendamentosPendentes > 0)<span class="ml-2 inline-block text-xs font-semibold text-white bg-orange-500 rounded-full px-2">{{ $agendamentosPendentes }}</span>@endif</div>
             </div>
         </div>
 
-        <!-- Total das Profissionais -->
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 overflow-hidden shadow-lg rounded-lg">
-            <div class="p-4 sm:p-6 text-white">
-                <div class="text-xs sm:text-sm font-semibold uppercase">Profissionais</div>
-                <div class="mt-2 text-2xl sm:text-4xl font-bold">R$ {{ number_format($profissionais->sum('total'), 2, ',', '.') }}</div>
-                <div class="mt-1 sm:mt-2 text-xs opacity-80">Comissões + Gorjetas</div>
+        <div class="flex items-center gap-3 p-3 rounded-lg shadow-sm" style="background: rgba(59,130,246,0.04); border-left: 4px solid var(--brand-primary);">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(59,130,246,0.12);">
+                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3h12v4H4zM4 9h8v8H4z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-gray-600">Profissionais</div>
+                <div class="mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($profissionais->sum('total'), 2, ',', '.') }}</div>
             </div>
         </div>
 
-        <!-- Total Geral -->
-        <div class="bg-gradient-to-br from-purple-500 to-purple-600 overflow-hidden shadow-lg rounded-lg">
-            <div class="p-4 sm:p-6 text-white">
-                <div class="text-xs sm:text-sm font-semibold uppercase">Faturamento</div>
-                <div class="mt-2 text-2xl sm:text-4xl font-bold">R$ {{ number_format($totalGeral, 2, ',', '.') }}</div>
-                <div class="mt-1 sm:mt-2 text-xs opacity-80">Total confirmado</div>
+        <div class="flex items-center gap-3 p-3 rounded-lg shadow-sm" style="background: rgba(139,92,246,0.04); border-left: 4px solid var(--brand-accent);">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(139,92,246,0.12);">
+                <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4h14v3H3zM3 9h14v7H3z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-gray-600">Faturamento</div>
+                <div class="mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($totalGeral, 2, ',', '.') }}</div>
             </div>
         </div>
     </div>

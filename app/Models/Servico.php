@@ -16,6 +16,7 @@ class Servico extends Model
         'preco',
         'duracao_minutos',
         'descricao',
+        'imagem_url',
         'ativo',
     ];
 

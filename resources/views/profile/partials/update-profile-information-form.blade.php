@@ -22,11 +22,12 @@
             <x-input-label for="avatar" value="Foto de Perfil" />
             <div class="mt-2 flex items-center gap-6">
                 <!-- Preview da foto -->
-                <div class="relative group">
+                <div class="relative group avatar-preview">
                     <img src="{{ $user->avatar_url }}" 
                          id="avatar-preview"
                          alt="{{ $user->name }}" 
-                         class="w-24 h-24 rounded-full object-cover ring-4 ring-vm-gold shadow-lg transition-all duration-300 group-hover:ring-vm-gold-600">
+                         class="w-24 h-24 rounded-full object-cover shadow-lg transition-all duration-300"
+                         style="box-shadow: 0 0 0 4px var(--brand-secondary);">
                     <!-- Overlay de upload -->
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-full transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                         <span class="text-white text-xs font-semibold">Trocar</span>
@@ -42,7 +43,7 @@
                                name="avatar" 
                                accept="image/*"
                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                        <div class="px-4 py-3 bg-vm-gold text-vm-navy-900 rounded-lg font-semibold text-center hover:bg-vm-gold-600 transition-colors cursor-pointer">
+                        <div class="px-4 py-3 rounded-lg font-semibold text-center transition-colors cursor-pointer" style="background: var(--brand-secondary); color: var(--brand-on-secondary, #0A1647);">
                             📸 Escolher Nova Foto
                         </div>
                     </div>
@@ -92,6 +93,67 @@
             @endif
         </div>
 
+        <!-- Configurações de Agenda -->
+        @if($user->isProfissional() || $user->isProprietaria())
+        <div class="border-t pt-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Configurações de Agenda</h3>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <label for="mostrar_agenda_comprometida" class="font-medium text-gray-900">
+                            Mostrar Agenda Completa
+                        </label>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Exibe todos os horários na página de agendamento, incluindo os já comprometidos. 
+                            Ideal para profissionais com agenda cheia que querem passar mais credibilidade.
+                        </p>
+                    </div>
+                    <div class="ml-4">
+                        <input type="checkbox" 
+                               id="mostrar_agenda_comprometida" 
+                               name="mostrar_agenda_comprometida" 
+                               value="1"
+                               {{ old('mostrar_agenda_comprometida', $user->mostrar_agenda_comprometida) ? 'checked' : '' }}
+                               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <label for="dark_mode" class="font-medium text-gray-900">
+                            Tema Escuro (Fundo Preto)
+                        </label>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Altera o fundo do site para preto, aplicando inicialmente na página de agendamento.
+                            Em breve estará disponível para todo o site.
+                        </p>
+                    </div>
+                    <div class="ml-4">
+                        <input type="checkbox" 
+                               id="dark_mode" 
+                               name="dark_mode" 
+                               value="1"
+                               {{ old('dark_mode', \App\Models\Setting::get('site.dark_mode')) ? 'checked' : '' }}
+                               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    </div>
+                </div>
+                
+                <div class="text-xs text-gray-500 bg-blue-50 p-3 rounded-lg">
+                    <strong>Como funciona:</strong><br>
+                    • <strong>Desativado (Padrão):</strong> Mostra apenas horários disponíveis. Se um horário estiver ocupado, sugere o próximo disponível.<br>
+                    • <strong>Ativado:</strong> Mostra a agenda completa com todos os horários, marcando visualmente os que estão comprometidos.
+                </div>
+                
+                <div class="text-xs text-gray-500 bg-blue-50 p-3 rounded-lg">
+                    <strong>Como funciona:</strong><br>
+                    • <strong>Desativado (Padrão):</strong> Fundo branco/claro.<br>
+                    • <strong>Ativado:</strong> Fundo preto na página de agendamento.
+                </div>
+            </div>
+        </div>
+        @endif
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
@@ -135,7 +197,7 @@
                             Para fazer upload de fotos, precisamos da permissão de acesso à câmera e galeria.
                         </p>
                         <div style="display: flex; gap: 10px; justify-content: center; flex-direction: column;">
-                            <button id="open-settings-btn" style="background: #D4AF37; color: #0A1647; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;">
+                            <button id="open-settings-btn" style="background: var(--brand-secondary); color: var(--brand-on-secondary, #0A1647); border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;">
                                 ⚙️ Ir para Configurações
                             </button>
                             <button id="try-again-btn" style="background: #3B82F6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">
@@ -287,7 +349,7 @@
                 document.getElementById('avatar-input').value = '';
                 
                 // Voltar para foto padrão
-                document.getElementById('avatar-preview').src = '{{ asset("logo.svg") }}';
+                document.getElementById('avatar-preview').src = '{{ \App\Models\Setting::get('site.logo') ? asset('storage/' . \App\Models\Setting::get('site.logo')) : asset("logo.svg") }}';
                 
                 // Adicionar flag para remover foto
                 const form = document.querySelector('form');

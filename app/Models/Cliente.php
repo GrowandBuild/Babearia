@@ -12,6 +12,7 @@ class Cliente extends Model
     protected $table = 'clientes';
 
     protected $fillable = [
+        'user_id',
         'nome',
         'telefone',
         'email',
@@ -25,6 +26,11 @@ class Cliente extends Model
         return $this->hasMany(Agendamento::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     // Accessor para URL do avatar
     public function getAvatarUrlAttribute()
     {
@@ -32,8 +38,8 @@ class Cliente extends Model
             return \Storage::url($this->avatar);
         }
         
-        // Avatar padrão com inicial do nome
-        return null;
+        // Avatar padrão com UI Avatars
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->nome) . '&color=0A1647&background=D4AF37&bold=true&size=200';
     }
 
     // Calcular total gasto pelo cliente

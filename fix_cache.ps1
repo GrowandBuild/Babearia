@@ -54,3 +54,5 @@ php artisan about 2>&1
 Write-Host "`nConcluído! Tente acessar o servidor novamente." -ForegroundColor Green
 
 
+
+

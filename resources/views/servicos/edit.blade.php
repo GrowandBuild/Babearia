@@ -8,7 +8,7 @@
         <div class="p-6">
             <h2 class="text-2xl font-bold mb-6">Editar Serviço</h2>
 
-            <form method="POST" action="{{ route('servicos.update', $servico) }}">
+            <form method="POST" action="{{ route('servicos.update', $servico) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="space-y-4">
@@ -34,6 +34,35 @@
                         <label class="block text-sm font-medium text-gray-700">Descrição</label>
                         <textarea name="descricao" rows="3"
                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('descricao', $servico->descricao) }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Imagem do Serviço</label>
+                        
+                        @if($servico->imagem_url)
+                            <div class="mb-4 p-3 bg-gray-50 rounded-md">
+                                <p class="text-xs font-medium text-gray-600 mb-2">Imagem Atual:</p>
+                                <img src="{{ $servico->imagem_url }}" alt="{{ $servico->nome }}" class="h-20 w-20 object-cover rounded-md border">
+                            </div>
+                        @endif
+                        
+                        <!-- Upload de Arquivo -->
+                        <div class="mb-4">
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Fazer Upload de Nova Imagem</label>
+                            <input type="file" name="imagem_upload" accept="image/*"
+                                   class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            <p class="text-xs text-gray-500 mt-1">Formatos: JPEG, PNG, JPG, GIF, SVG (Máx: 2MB)</p>
+                            @error('imagem_upload')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- URL da Imagem -->
+                        <div class="border-t pt-4">
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Ou informar nova URL da Imagem</label>
+                            <input type="url" name="imagem_url" value="{{ old('imagem_url', $servico->imagem_url) }}" placeholder="https://exemplo.com/imagem.jpg"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="text-xs text-gray-500 mt-1">Deixe em branco se fizer upload</p>
+                            @error('imagem_url')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
                     </div>
 
                     <div class="flex gap-3">

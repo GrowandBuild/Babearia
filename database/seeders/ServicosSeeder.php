@@ -9,8 +9,8 @@ class ServicosSeeder extends Seeder
 {
     public function run()
     {
-        // Serviços sincronizados automaticamente em 21/10/2025 14:36:47
-        // Total de serviços: 6
+        // Serviços sincronizados automaticamente em 12/01/2026 12:23:38
+        // Total de serviços: 7
 
         Servico::updateOrCreate(
             ['nome' => 'Manicure'],
@@ -18,7 +18,7 @@ class ServicosSeeder extends Seeder
                 'nome' => 'Manicure',
                 'descricao' => 'Manicure tradicional com esmaltação',
                 'preco' => 30.00,
-                'duracao_minutos' => 60,
+                'duracao' => ,
                 'ativo' => true,
             ]
         );
@@ -29,7 +29,7 @@ class ServicosSeeder extends Seeder
                 'nome' => 'Pedicure',
                 'descricao' => 'Pedicure tradicional com esmaltação',
                 'preco' => 35.00,
-                'duracao_minutos' => 90,
+                'duracao' => ,
                 'ativo' => true,
             ]
         );
@@ -40,7 +40,7 @@ class ServicosSeeder extends Seeder
                 'nome' => 'Esmaltação em Gel',
                 'descricao' => 'Esmaltação em gel com durabilidade de até 3 semanas',
                 'preco' => 50.00,
-                'duracao_minutos' => 120,
+                'duracao' => ,
                 'ativo' => true,
             ]
         );
@@ -51,7 +51,7 @@ class ServicosSeeder extends Seeder
                 'nome' => 'Spa dos Pés',
                 'descricao' => 'Tratamento completo dos pés com hidratação e esmaltação',
                 'preco' => 60.00,
-                'duracao_minutos' => 120,
+                'duracao' => ,
                 'ativo' => true,
             ]
         );
@@ -62,7 +62,7 @@ class ServicosSeeder extends Seeder
                 'nome' => 'Unhas Decoradas',
                 'descricao' => 'Esmaltação com decorações e artes especiais',
                 'preco' => 70.00,
-                'duracao_minutos' => 150,
+                'duracao' => ,
                 'ativo' => true,
             ]
         );
@@ -73,7 +73,18 @@ class ServicosSeeder extends Seeder
                 'nome' => 'Manicure + Pedicure',
                 'descricao' => 'Pacote completo: manicure e pedicure',
                 'preco' => 55.00,
-                'duracao_minutos' => 120,
+                'duracao' => ,
+                'ativo' => true,
+            ]
+        );
+
+        Servico::updateOrCreate(
+            ['nome' => 'Corte Masculino'],
+            [
+                'nome' => 'Corte Masculino',
+                'descricao' => 'Corte tradicional masculino',
+                'preco' => 30.00,
+                'duracao' => ,
                 'ativo' => true,
             ]
         );

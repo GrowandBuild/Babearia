@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="gradient-navy-gold border-b-4 border-vm-gold shadow-xl">
+<nav x-data="{ open: false }" class="gradient-navy-gold border-b-4 border-vm-gold shadow-xl site-header" style="background: var(--brand-header-bg); color: var(--brand-header-text);">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
@@ -14,19 +14,27 @@
             <div class="flex-1 sm:flex-none flex justify-center sm:justify-start">
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-3 transition-transform duration-300 hover:scale-105">
-                        <img src="{{ asset('logo.svg') }}" alt="Esmalteria Vida Maria" class="h-10 w-auto">
+                        <x-site-logo class="h-10 w-auto" />
                     </a>
                 </div>
 
                 <!-- Navigation Links (Desktop) -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        Painel
-                    </x-nav-link>
+                    @if(!Auth::user()->isCliente())
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            Painel
+                        </x-nav-link>
+                    @endif
                     
                     <x-nav-link :href="route('agendamentos.agenda')" :active="request()->routeIs('agendamentos.*')">
                         Agenda
                     </x-nav-link>
+
+                    @if(!Auth::user()->isCliente())
+                        <x-nav-link :href="route('financeiro')" :active="request()->routeIs('financeiro')">
+                            Financeiro
+                        </x-nav-link>
+                    @endif
 
                     @can('isProprietaria')
                         <x-nav-link :href="route('profissionais.index')" :active="request()->routeIs('profissionais.*')">
@@ -52,7 +60,7 @@
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white hover:text-vm-gold focus:outline-none transition ease-in-out duration-150">
+                        <button class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md hover:text-vm-gold focus:outline-none transition ease-in-out duration-150" style="background: var(--brand-header-bg); color: var(--brand-header-text);">
                             <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-8 h-8 rounded-full object-cover ring-2 ring-vm-gold">
                             <div>{{ Auth::user()->name }}</div>
 
@@ -96,16 +104,18 @@
     </div>
 
     <!-- Mobile Bottom Navigation -->
-    <div class="sm:hidden fixed bottom-0 left-0 right-0 bg-vm-navy-800 border-t-4 border-vm-gold shadow-2xl z-50">
+            <div class="sm:hidden fixed bottom-0 left-0 right-0 border-t-4 border-vm-gold shadow-2xl z-50" style="background: var(--brand-header-bg); color: var(--brand-header-text);">
         <div class="flex justify-around items-center h-16 px-2">
-            <!-- Início -->
-            <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300 {{ request()->routeIs('dashboard') ? 'text-vm-gold' : 'text-white hover:text-vm-gold-300' }}">
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                </svg>
-                <span class="text-xs font-medium">Início</span>
-            </a>
-
+            @if(!Auth::user()->isCliente())
+                <!-- Início -->
+                <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300 {{ request()->routeIs('dashboard') ? 'text-vm-gold' : 'text-white hover:text-vm-gold-300' }}">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="text-xs font-medium">Início</span>
+                </a>
+            @endif
+            
             <!-- Agenda -->
             <a href="{{ route('agendamentos.agenda') }}" class="flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300 {{ request()->routeIs('agendamentos.*') ? 'text-vm-gold' : 'text-white hover:text-vm-gold-300' }}">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,14 +124,16 @@
                 <span class="text-xs font-medium">Agenda</span>
             </a>
 
-            <!-- Financeiro (todos) -->
-            <a href="{{ route('financeiro') }}" class="flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300 {{ request()->routeIs('financeiro') ? 'text-vm-gold' : 'text-white hover:text-vm-gold-300' }}">
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span class="text-xs font-medium">Financeiro</span>
-            </a>
-
+            @if(!Auth::user()->isCliente())
+                <!-- Financeiro (todos) -->
+                <a href="{{ route('financeiro') }}" class="flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300 {{ request()->routeIs('financeiro') ? 'text-vm-gold' : 'text-white hover:text-vm-gold-300' }}">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-xs font-medium">Financeiro</span>
+                </a>
+            @endif
+            
             <!-- Menu (Hamburger) -->
             <button @click="open = ! open" class="flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300" :class="open ? 'text-vm-gold' : 'text-white hover:text-vm-gold-300'">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +169,13 @@
                     <div class="text-sm text-vm-gold-300">{{ Auth::user()->email }}</div>
                     <div class="mt-1">
                         <span class="badge-gold text-xs">
-                            {{ Auth::user()->isProprietaria() ? '👑 Proprietária' : '💅 Profissional' }}
+                            @if(Auth::user()->isProprietaria())
+                                👑 Proprietária
+                            @elseif(Auth::user()->isCliente())
+                                👤 Cliente
+                            @else
+                                💅 Profissional
+                            @endif
                         </span>
                     </div>
                 </div>
@@ -174,20 +192,22 @@
                 <span class="font-medium">Agendar</span>
             </a>
 
-            <!-- Clientes (todos podem acessar) -->
-            <a href="{{ route('clientes.index') }}" class="flex items-center px-6 py-3 text-vm-navy-800 hover:bg-vm-navy-50 transition-colors {{ request()->routeIs('clientes.*') ? 'bg-vm-gold-50 border-l-4 border-vm-gold' : '' }}">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                </svg>
-                <span class="font-medium">Clientes</span>
-            </a>
+            @if(!Auth::user()->isCliente())
+                <!-- Clientes (todos podem acessar) -->
+                <a href="{{ route('clientes.index') }}" class="flex items-center px-6 py-3 text-vm-navy-800 hover:bg-vm-navy-50 transition-colors {{ request()->routeIs('clientes.*') ? 'bg-vm-gold-50 border-l-4 border-vm-gold' : '' }}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <span class="font-medium">Clientes</span>
+                </a>
+            @endif
 
-            @can('isProprietaria')
+            @if(!Auth::user()->isCliente())
                 <div class="border-t border-gray-200 my-2"></div>
                 
                 <a href="{{ route('profissionais.index') }}" class="flex items-center px-6 py-3 text-vm-navy-800 hover:bg-vm-navy-50 transition-colors {{ request()->routeIs('profissionais.*') ? 'bg-vm-gold-50 border-l-4 border-vm-gold' : '' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.298 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                     <span class="font-medium">Profissionais</span>
                 </a>
@@ -212,7 +232,7 @@
                     </svg>
                     <span class="font-medium">💾 Backup</span>
                 </a>
-            @endcan
+            @endif
 
             <div class="border-t border-gray-200 my-2"></div>
 
@@ -225,7 +245,7 @@
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                <button type="submit" class="w-full flex items-center px-6 py-3 text-red-600 hover:bg-red-50 transition-colors">
+                <button type="submit" class="w-full flex items-center px-6 py-3 hover:bg-red-50 transition-colors" style="background: transparent; color: var(--brand-header-text);">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                     </svg>

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Esmalteria Vida Maria') }} - @yield('title', 'Sistema')</title>
-        <meta name="description" content="Sistema completo de agendamentos e gestão financeira para Esmalteria Vida Maria">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ \App\Models\Setting::getCompanyName() }} - @yield('title', 'Sistema')</title>
+    <meta name="description" content="Sistema completo de agendamentos e gestão financeira para {{ \App\Models\Setting::getCompanyName() }}">
 
         <!-- Favicons e Ícones -->
         <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
@@ -25,12 +26,111 @@
         <link rel="manifest" href="/manifest.json">
         <meta name="msapplication-TileColor" content="#0A1647">
         <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
-        <meta name="theme-color" content="#D4AF37">
+        <meta name="theme-color" content="{{ \App\Models\Setting::get('brand.secondary', '#D4AF37') }}">
+        @php
+            $brandPrimary = \App\Models\Setting::get('brand.primary', '#1f2937');
+            $brandSecondary = \App\Models\Setting::get('brand.secondary', '#3b82f6');
+            $brandTertiary = \App\Models\Setting::get('brand.tertiary', '#10b981');
+            $textLight = \App\Models\Setting::get('brand.text_light', '#111827');
+            $textDark = \App\Models\Setting::get('brand.text_dark', '#f9fafb');
+            $brandAccent = \App\Models\Setting::get('brand.accent', '#f97316');
+            $brandBg = \App\Models\Setting::get('brand.bg', '#ffffff');
+            $brandSurface = \App\Models\Setting::get('brand.surface', '#f8fafc');
+            $brandBorder = \App\Models\Setting::get('brand.border', '#e5e7eb');
+            $brandMuted = \App\Models\Setting::get('brand.muted', '#6b7280');
+            $brandSuccess = \App\Models\Setting::get('brand.success', '#10b981');
+            $brandWarning = \App\Models\Setting::get('brand.warning', '#f59e0b');
+            $brandDanger = \App\Models\Setting::get('brand.danger', '#ef4444');
+            $brandInfo = \App\Models\Setting::get('brand.info', '#3b82f6');
+            $brandOnPrimary = \App\Models\Setting::get('brand.on_primary', '#ffffff');
+            $brandOnSecondary = \App\Models\Setting::get('brand.on_secondary', '#ffffff');
+        @endphp
+        <style>
+            :root {
+                --brand-primary: {{ $brandPrimary }};
+                --brand-secondary: {{ $brandSecondary }};
+                --brand-tertiary: {{ $brandTertiary }};
+                --text-light: {{ $textLight }};
+                --text-dark: {{ $textDark }};
+                --brand-accent: {{ $brandAccent }};
+                --brand-bg: {{ $brandBg }};
+                --brand-surface: {{ $brandSurface }};
+                --brand-border: {{ $brandBorder }};
+                --brand-muted: {{ $brandMuted }};
+                --brand-success: {{ $brandSuccess }};
+                --brand-warning: {{ $brandWarning }};
+                --brand-danger: {{ $brandDanger }};
+                --brand-info: {{ $brandInfo }};
+                --brand-on-primary: {{ $brandOnPrimary }};
+                --brand-on-secondary: {{ $brandOnSecondary }};
+
+                /* legacy vm-gold palette -> map to brand secondary for backward compatibility */
+                --vm-gold: var(--brand-secondary);
+                --vm-gold-50: var(--brand-secondary);
+                --vm-gold-100: var(--brand-secondary);
+                --vm-gold-200: var(--brand-secondary);
+                --vm-gold-300: var(--brand-secondary);
+                --vm-gold-400: var(--brand-secondary);
+                --vm-gold-500: var(--brand-secondary);
+                --vm-gold-600: var(--brand-secondary);
+                --vm-gold-700: var(--brand-secondary);
+                --vm-gold-800: var(--brand-secondary);
+                --vm-gold-900: var(--brand-secondary);
+
+                --brand-header-bg: {{ \App\Models\Setting::get('brand.header_bg', $brandPrimary) }};
+                --brand-header-text: {{ \App\Models\Setting::get('brand.header_text', $brandOnPrimary) }};
+                --brand-btn-primary-bg: {{ \App\Models\Setting::get('brand.btn_primary_bg', $brandPrimary) }};
+                --brand-btn-primary-text: {{ \App\Models\Setting::get('brand.btn_primary_text', $brandOnPrimary) }};
+                --brand-btn-primary-hover: {{ \App\Models\Setting::get('brand.btn_primary_hover', \App\Models\Setting::get('brand.btn_primary_bg', $brandPrimary)) }};
+                --brand-btn-secondary-bg: {{ \App\Models\Setting::get('brand.btn_secondary_bg', $brandSecondary) }};
+                --brand-btn-secondary-text: {{ \App\Models\Setting::get('brand.btn_secondary_text', $brandOnSecondary) }};
+                --brand-btn-secondary-hover: {{ \App\Models\Setting::get('brand.btn_secondary_hover', \App\Models\Setting::get('brand.btn_secondary_bg', $brandSecondary)) }};
+            }
+            /* Apply default text color for light mode */
+            body { color: var(--text-light); }
+            /* When a dark class is present on html or body, switch to dark text color */
+            html.dark body, body.dark { color: var(--text-dark); }
+
+            /* Bridge existing layout classes to brand variables so header and common areas follow identity */
+            .gradient-navy-gold { background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary)); }
+            .border-vm-gold { border-color: var(--brand-secondary) !important; }
+            .ring-vm-gold { box-shadow: 0 0 0 2px rgba(0,0,0,0.05), 0 0 0 4px var(--brand-secondary); }
+            .bg-vm-navy-800 { background-color: var(--brand-primary) !important; }
+            .text-vm-gold, .text-vm-gold-300, .text-vm-gold-50 { color: var(--brand-secondary) !important; }
+            /* Generic brand helpers */
+            .bg-brand-primary { background-color: var(--brand-primary) !important; }
+            .bg-brand-secondary { background-color: var(--brand-secondary) !important; }
+            .bg-brand-tertiary { background-color: var(--brand-tertiary) !important; }
+            .bg-brand-accent { background-color: var(--brand-accent) !important; }
+            .bg-brand-surface { background-color: var(--brand-surface) !important; }
+            .bg-brand-bg { background-color: var(--brand-bg) !important; }
+            .text-brand-on-primary { color: var(--brand-on-primary) !important; }
+            .text-brand-on-secondary { color: var(--brand-on-secondary) !important; }
+            .border-brand { border-color: var(--brand-border) !important; }
+            .text-muted { color: var(--brand-muted) !important; }
+            .btn-brand { background-color: var(--brand-primary); color: var(--brand-on-primary); }
+            .btn-accent { background-color: var(--brand-accent); color: var(--brand-on-primary); }
+            /* Header helpers */
+            .site-header { background: var(--brand-header-bg); color: var(--brand-header-text); }
+            /* Nav-link styling to respect profile-configured header/text colors */
+            .site-header .nav-link { color: var(--brand-header-text) !important; border-color: transparent !important; }
+            .site-header .nav-link.active { color: var(--brand-header-text) !important; border-color: var(--brand-secondary) !important; }
+            .site-header .nav-link:hover { color: var(--brand-secondary) !important; border-color: var(--brand-secondary) !important; }
+            /* Button helpers and previews */
+            .btn-primary { background: var(--brand-btn-primary-bg) !important; color: var(--brand-btn-primary-text) !important; }
+            .btn-primary:hover { background: var(--brand-btn-primary-hover) !important; }
+            .btn-secondary { background: var(--brand-btn-secondary-bg) !important; color: var(--brand-btn-secondary-text) !important; }
+            .btn-secondary:hover { background: var(--brand-btn-secondary-hover) !important; }
+            .text-success { color: var(--brand-success) !important; }
+            .text-warning { color: var(--brand-warning) !important; }
+            .text-danger { color: var(--brand-danger) !important; }
+            .text-info { color: var(--brand-info) !important; }
+        </style>
         
         <!-- PWA Meta Tags -->
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Vida Maria">
+        <meta name="apple-mobile-web-app-title" content="{{ \App\Models\Setting::getCompanyName() }}">
         <meta name="mobile-web-app-capable" content="yes">
         
         <!-- Icons -->
@@ -77,7 +177,7 @@
         
         <!-- Sistema de Sincronização Offline -->
         <script>
-            // Sistema de Sincronização Offline - Vida Maria Esmalteria
+            // Sistema de Sincronização Offline - {{ \App\Models\Setting::getCompanyName() }}
             class OfflineSync {
                 constructor() {
                     this.dbName = 'VidaMariaOffline';
@@ -866,17 +966,48 @@
                     // Criar modal de instalação
                     const installModal = document.createElement('div');
                     installModal.id = '__installModal';
+                    
+                    // Adicionar CSS dinâmico
+                    const modalTheme = '{{ \App\Models\Setting::get('client.modal_theme', 'light') }}';
+                    const isDark = modalTheme === 'dark';
+                    
+                    console.log('Modal Theme:', modalTheme);
+                    console.log('Is Dark:', isDark);
+                    
                     installModal.innerHTML = `
+                        <style>
+                            #__installModal .modal-content {
+                                background-color: ${isDark ? '#1f2937' : '#ffffff'} !important;
+                                color: ${isDark ? '#ffffff' : '#1f2937'} !important;
+                            }
+                            #__installModal .modal-title {
+                                color: ${isDark ? '#ffffff' : '#0A1647'} !important;
+                            }
+                            #__installModal .modal-description {
+                                color: ${isDark ? '#9ca3af' : '#666666'} !important;
+                            }
+                            #__installModal .modal-btn-secondary {
+                                background: ${isDark ? '#374151' : '#f5f5f5'} !important;
+                                color: ${isDark ? '#9ca3af' : '#666666'} !important;
+                            }
+                        </style>
+                        
                         <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-                            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                                <div style="font-size: 48px; margin-bottom: 20px;">💅</div>
-                                <h3 style="color: #0A1647; margin-bottom: 15px; font-size: 24px;">Instalar App Vida Maria</h3>
-                                <p style="color: #666; margin-bottom: 25px; line-height: 1.5;">Instale o app para acesso rápido e funcionalidade offline!</p>
+                            <div class="modal-content" style="padding: 30px; border-radius: 15px; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                @if(\App\Models\Setting::get('site.logo'))
+                                    <img src="{{ asset('storage/' . \App\Models\Setting::get('site.logo')) }}" 
+                                         alt="Logo da Empresa" 
+                                         style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 20px; border-radius: 8px;">
+                                @else
+                                    <div style="font-size: 48px; margin-bottom: 20px;">💅</div>
+                                @endif
+                                <h3 class="modal-title" style="margin-bottom: 15px; font-size: 24px;">Instalar App {{ \App\Models\Setting::getCompanyName() }}</h3>
+                                <p class="modal-description" style="margin-bottom: 25px; line-height: 1.5;">Instale o app para acesso rápido e funcionalidade offline!</p>
                                 <div style="display: flex; gap: 10px; justify-content: center;">
-                                    <button id="install-app-btn" style="background: #D4AF37; color: #0A1647; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;">
+                                    <button id="install-app-btn" class="modal-btn-primary" style="padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;">
                                         📱 Instalar Agora
                                     </button>
-                                    <button id="install-later-btn" style="background: #f5f5f5; color: #666; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">
+                                    <button id="install-later-btn" class="modal-btn-secondary" style="padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">
                                         Depois
                                     </button>
                                 </div>
@@ -911,7 +1042,7 @@
                 }
             }
 
-            // Registrar Service Worker
+            // Registrar Service Worker - {{ \App\Models\Setting::getCompanyName() }}
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('/service-worker.js')

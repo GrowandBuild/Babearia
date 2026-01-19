@@ -29,6 +29,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        
+        // Redirecionar clientes para página de agendamento
+        if ($user && $user->isCliente()) {
+            return redirect()->route('agendamentos.auto-agendar');
+        }
+
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 

@@ -19,10 +19,13 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
+        'phone',
         'email',
         'password',
         'tipo',
         'avatar',
+        'mostrar_agenda_comprometida',
     ];
 
     /**
@@ -42,12 +45,18 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'mostrar_agenda_comprometida' => 'boolean',
     ];
 
     // Relacionamentos
     public function profissional()
     {
         return $this->hasOne(Profissional::class);
+    }
+
+    public function cliente()
+    {
+        return $this->hasOne(Cliente::class);
     }
 
     // Helpers
@@ -59,6 +68,11 @@ class User extends Authenticatable
     public function isProfissional()
     {
         return $this->tipo === 'profissional';
+    }
+
+    public function isCliente()
+    {
+        return $this->tipo === 'cliente';
     }
 
     public function getAvatarUrlAttribute()

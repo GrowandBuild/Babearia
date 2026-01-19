@@ -47,7 +47,7 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <button type="submit" class="btn-primary">
+                        <button type="submit" class="btn-primary" style="background: var(--brand-btn-primary-bg); color: var(--brand-btn-primary-text);">
                             Salvar Taxa
                         </button>
                         <a href="{{ route('formas-pagamento.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">

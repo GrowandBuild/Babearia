@@ -21,8 +21,11 @@ class DashboardController extends Controller
 
         if ($user->isProprietaria()) {
             return $this->dashboardProprietaria($dataInicio, $dataFim);
-        } else {
+        } elseif ($user->isProfissional() && $user->profissional) {
             return $this->dashboardProfissional($dataInicio, $dataFim, $user->profissional);
+        } else {
+            // Para clientes ou profissionais sem registro, mostrar dashboard básico
+            return $this->dashboardCliente($dataInicio, $dataFim, $user);
         }
     }
 
@@ -106,6 +109,56 @@ class DashboardController extends Controller
             'agendamentosPendentes',
             'dataInicio',
             'dataFim'
+        ));
+    }
+
+    private function dashboardCliente($dataInicio, $dataFim, $user)
+    {
+        // Verificar se o usuário tem um cliente associado
+        $cliente = $user->cliente;
+        
+        if (!$cliente) {
+            // Usuário cliente sem registro na tabela clientes
+            return view('dashboard.cliente', [
+                'agendamentos' => collect([]),
+                'totalGasto' => 0,
+                'proximosAgendamentos' => collect([]),
+                'dataInicio' => $dataInicio,
+                'dataFim' => $dataFim,
+                'user' => $user
+            ]);
+        }
+
+        // Buscar os agendamentos do cliente
+        $agendamentos = Agendamento::where('cliente_id', $cliente->id)
+            ->whereBetween('data_hora', [$dataInicio, $dataFim])
+            ->with(['servico', 'profissional', 'pagamentos'])
+            ->orderBy('data_hora', 'desc')
+            ->get();
+
+        // Total gasto pelo cliente
+        $totalGasto = 0;
+        foreach ($agendamentos as $agendamento) {
+            foreach ($agendamento->pagamentos as $pagamento) {
+                $totalGasto += $pagamento->valor;
+            }
+        }
+
+        // Próximos agendamentos
+        $proximosAgendamentos = Agendamento::where('cliente_id', $cliente->id)
+            ->where('data_hora', '>=', now())
+            ->with(['servico', 'profissional'])
+            ->orderBy('data_hora', 'asc')
+            ->take(5)
+            ->get();
+
+        return view('dashboard.cliente', compact(
+            'agendamentos',
+            'totalGasto',
+            'proximosAgendamentos',
+            'dataInicio',
+            'dataFim',
+            'user'
         ));
     }
 

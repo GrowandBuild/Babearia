@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Servico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ServicoController extends Controller
 {
@@ -26,9 +28,29 @@ class ServicoController extends Controller
             'preco' => 'required|numeric|min:0',
             'duracao_minutos' => 'nullable|integer|min:0',
             'descricao' => 'nullable|string',
+            'imagem_url' => 'nullable|url',
+            'imagem_upload' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        Servico::create($request->all());
+        $data = $request->all();
+        
+        // Processar upload de imagem
+        if ($request->hasFile('imagem_upload')) {
+            $image = $request->file('imagem_upload');
+            $imageName = 'servicos/' . Str::uuid() . '.' . $image->getClientOriginalExtension();
+            $image->storePubliclyAs('servicos', $image->getClientOriginalName(), 'public');
+            $data['imagem_url'] = Storage::url($imageName);
+        }
+        
+        // Se não houver upload mas tiver URL, usar a URL
+        if (empty($data['imagem_url']) && $request->filled('imagem_url')) {
+            $data['imagem_url'] = $request->input('imagem_url');
+        }
+        
+        // Remover o campo de upload do array de dados
+        unset($data['imagem_upload']);
+
+        Servico::create($data);
 
         // Sincronizar com o seeder
         $this->syncServicesToSeeder();
@@ -49,9 +71,29 @@ class ServicoController extends Controller
             'preco' => 'required|numeric|min:0',
             'duracao_minutos' => 'nullable|integer|min:0',
             'descricao' => 'nullable|string',
+            'imagem_url' => 'nullable|url',
+            'imagem_upload' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $servico->update($request->all());
+        $data = $request->all();
+        
+        // Processar upload de imagem
+        if ($request->hasFile('imagem_upload')) {
+            $image = $request->file('imagem_upload');
+            $imageName = 'servicos/' . Str::uuid() . '.' . $image->getClientOriginalExtension();
+            $image->storePubliclyAs('servicos', $image->getClientOriginalName(), 'public');
+            $data['imagem_url'] = Storage::url($imageName);
+        }
+        
+        // Se não houver upload mas tiver URL, usar a URL
+        if (empty($data['imagem_url']) && $request->filled('imagem_url')) {
+            $data['imagem_url'] = $request->input('imagem_url');
+        }
+        
+        // Remover o campo de upload do array de dados
+        unset($data['imagem_upload']);
+
+        $servico->update($data);
 
         // Sincronizar com o seeder
         $this->syncServicesToSeeder();

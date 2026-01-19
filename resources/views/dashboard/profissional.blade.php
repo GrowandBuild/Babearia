@@ -18,7 +18,7 @@
                     <input type="date" name="data_fim" value="{{ $dataFim }}" 
                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-vm-gold focus:ring-vm-gold text-sm">
                 </div>
-                <button type="submit" class="btn-primary w-full sm:w-auto sm:mt-5">
+                <button type="submit" class="btn-primary w-full sm:w-auto sm:mt-5" style="background: var(--brand-btn-primary-bg); color: var(--brand-btn-primary-text);">
                     Filtrar Período
                 </button>
             </form>

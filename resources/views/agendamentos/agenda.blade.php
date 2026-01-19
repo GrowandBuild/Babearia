@@ -5,35 +5,35 @@
 @section('content')
 <div class="max-w-full mx-auto sm:px-6 lg:px-8">
     <!-- Header com Navegação e Filtros -->
-    <div class="bg-gradient-to-r from-vm-gold to-vm-gold-600 shadow-lg mb-4 sm:mb-6 rounded-lg">
+    <div class="shadow-lg mb-4 sm:mb-6 rounded-lg site-header" style="background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary)); color: var(--brand-header-text);">
         <div class="p-4 sm:p-6">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <!-- Navegação de Data -->
                 <div class="flex items-center gap-3 flex-wrap">
-                    <a href="{{ route('agendamentos.agenda', ['data' => \Carbon\Carbon::parse($data)->subDay()->format('Y-m-d'), 'profissional_id' => $profissionalId]) }}" 
-                       class="p-2 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-md border-2 border-white/50">
+                          <a href="{{ route('agendamentos.agenda', ['data' => \Carbon\Carbon::parse($data)->subDay()->format('Y-m-d'), 'profissional_id' => $profissionalId]) }}" 
+                              class="p-2 rounded-lg transition-colors shadow-sm" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.06); color: var(--brand-header-text);">
                         <svg class="w-5 h-5 text-vm-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                         </svg>
                     </a>
                     <a href="{{ route('agendamentos.agenda', ['data' => today()->format('Y-m-d'), 'profissional_id' => $profissionalId]) }}" 
-                       class="px-4 py-2 bg-white hover:bg-gray-100 rounded-lg text-vm-gold font-bold transition-colors shadow-md border-2 border-white/50">
+                       class="px-4 py-2 rounded-lg font-bold transition-colors shadow-sm" style="background: rgba(255,255,255,0.08); color: var(--brand-header-text); border: 1px solid rgba(255,255,255,0.06);">
                         Hoje
                     </a>
-                    <a href="{{ route('agendamentos.agenda', ['data' => \Carbon\Carbon::parse($data)->addDay()->format('Y-m-d'), 'profissional_id' => $profissionalId]) }}" 
-                       class="p-2 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-md border-2 border-white/50">
+                          <a href="{{ route('agendamentos.agenda', ['data' => \Carbon\Carbon::parse($data)->addDay()->format('Y-m-d'), 'profissional_id' => $profissionalId]) }}" 
+                              class="p-2 rounded-lg transition-colors shadow-sm" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.06); color: var(--brand-header-text);">
                         <svg class="w-5 h-5 text-vm-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                         </svg>
                     </a>
-                    <div class="px-4 py-2 bg-white rounded-lg shadow-md border-2 border-white/50">
-                        <input type="date" 
+                    <div class="px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.04);">
+                           <input type="date" 
                                value="{{ $data }}" 
                                onchange="window.location.href='{{ route('agendamentos.agenda') }}?data=' + this.value + '&profissional_id={{ $profissionalId }}'"
-                               class="border-0 focus:ring-0 text-gray-900 font-bold text-sm">
+                               class="border-0 focus:ring-0 font-bold text-sm" style="background: transparent; color: var(--brand-header-text);">
                     </div>
-                    <div class="px-4 py-2 bg-white rounded-lg shadow-md border-2 border-white/50">
-                        <span class="text-vm-gold font-bold text-lg">
+                    <div class="px-4 py-2 rounded-lg" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.04);">
+                        <span class="font-bold text-lg" style="color: var(--brand-header-text);">
                             {{ \Carbon\Carbon::parse($data)->locale('pt_BR')->translatedFormat('d M Y - l') }}
                         </span>
                     </div>
@@ -58,7 +58,7 @@
                     @endcan
                     
                     <a href="{{ route('agendamentos.create') }}" 
-                       class="px-6 py-2 bg-white text-vm-gold font-bold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all flex items-center gap-2 border-2 border-white/50">
+                       class="px-5 py-2 rounded-lg font-bold flex items-center gap-2 transition-all" style="background: var(--brand-secondary); color: var(--brand-on-secondary); box-shadow: 0 6px 18px rgba(0,0,0,0.12);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -70,27 +70,33 @@
     </div>
 
     <!-- Grade de Agenda -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-brand-surface rounded-lg shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
-                    <tr class="bg-gray-100 border-b-2 border-gray-300">
-                        <th class="sticky left-0 z-20 bg-gray-100 px-4 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-r-2 border-gray-300 min-w-[80px] shadow-sm">
+                    <tr style="background: var(--brand-surface); border-bottom: 1px solid var(--brand-border);">
+                        <th class="sticky left-0 z-20 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-r" style="min-width:80px; border-right:1px solid var(--brand-border); color: var(--text-light);">
                             Horário
                         </th>
                         @php
-                            $profissionaisParaExibir = $profissionalId 
-                                ? $profissionais->where('id', $profissionalId) 
-                                : $profissionais;
+                            $solo = \App\Models\Setting::get('site.solo_mode');
+                            if ($solo) {
+                                // quando em modo 'trabalho sozinho', exibir apenas o primeiro profissional (ou o vinculado)
+                                $profissionaisParaExibir = $profissionais->slice(0,1);
+                            } else {
+                                $profissionaisParaExibir = $profissionalId 
+                                    ? $profissionais->where('id', $profissionalId) 
+                                    : $profissionais;
+                            }
                         @endphp
                         @foreach($profissionaisParaExibir as $prof)
-                            <th class="px-4 py-3 text-center border-r border-gray-300 min-w-[200px] bg-gray-50">
+                            <th class="px-4 py-3 text-center border-r min-w-[200px]" style="border-right:1px solid var(--brand-border); color: var(--text-light);">
                                 <div class="flex flex-col items-center gap-2">
                                     <x-avatar 
                                         :src="$prof->avatar_url" 
                                         :name="$prof->nome" 
                                         size="md" />
-                                    <span class="text-sm font-bold text-gray-900">{{ $prof->nome }}</span>
+                                    <span class="text-sm font-semibold" style="color: var(--text-light);">{{ $prof->nome }}</span>
                                 </div>
                             </th>
                         @endforeach
@@ -189,15 +195,15 @@
                                 }
                             }
                             
-                            // Altura da linha: 30px se estiver vazia (mais compacta), 60px se tiver agendamento
-                            $alturaLinha = $temAgendamento ? 60 : 30;
+                            // Altura da linha: 25px se estiver vazia (mais compacta), 70px se tiver agendamento
+                            $alturaLinha = $temAgendamento ? 70 : 25;
                         @endphp
-                        <tr class="border-b border-gray-200 {{ $temAgendamento ? 'hover:bg-gray-50 bg-white' : 'bg-gray-50/50' }} transition-colors">
-                            <td class="sticky left-0 z-10 {{ $temAgendamento ? 'bg-white' : 'bg-gray-50/50' }} px-4 py-2 text-sm font-bold text-gray-900 border-r-2 border-gray-300 shadow-sm">
+                        <tr class="transition-colors" style="border-bottom:1px solid var(--brand-border);">
+                            <td class="sticky left-0 z-10 px-4 py-2 text-sm font-semibold border-r" style="border-right:1px solid var(--brand-border); color: var(--text-light); background: var(--brand-surface);">
                                 {{ $horario }}
                             </td>
                             @foreach($profissionaisParaExibir as $prof)
-                                <td class="px-2 py-1 border-r border-gray-200 relative {{ $temAgendamento ? 'bg-white' : 'bg-gray-50/50' }}" style="height: {{ $alturaLinha }}px;">
+                                <td class="px-2 py-1 border-r relative" style="height: {{ $alturaLinha }}px; border-right:1px solid var(--brand-border); background: transparent;">
                                     @php
                                         // Encontrar agendamento que começa neste horário
                                         $agendamentoPrincipal = collect($agendamentosPorProf[$prof->id] ?? [])
@@ -213,9 +219,9 @@
                                             // Calcular quantos slots de 30min o agendamento ocupa
                                             $slots = max(1, ceil($duracao / 30));
                                             
-                                            // Calcular altura: considerar que linhas vazias têm 30px e linhas com agendamento têm 60px
-                                            // Mas para simplificar, vamos usar 60px por slot quando há agendamento
-                                            $alturaTotal = ($slots * 60) - 8; // 60px por slot, menos 8px de margem
+                                            // Calcular altura: considerar que linhas vazias têm 25px e linhas com agendamento têm 70px
+                                            // Mas para simplificar, vamos usar 70px por slot quando há agendamento
+                                            $alturaTotal = ($slots * 70) - 4; // 70px por slot, menos 4px de margem
                                             $coresStatus = match($agendamentoPrincipal->status) {
                                                 'concluido' => [
                                                     'bg' => 'bg-green-600',
@@ -239,33 +245,43 @@
                                                 ]
                                             };
                                         @endphp
-                                        <div class="absolute top-1 left-1 right-1 rounded-lg shadow-xl border-2 {{ $coresStatus['bg'] }} {{ $coresStatus['text'] }} {{ $coresStatus['border'] }} p-2 overflow-hidden cursor-pointer hover:shadow-2xl hover:scale-[1.02] transition-all group"
-                                             style="height: {{ $alturaTotal }}px; z-index: 5;"
-                                             onclick="window.location.href='{{ route('agendamentos.edit', $agendamentoPrincipal) }}'"
-                                             title="{{ $agendamentoPrincipal->nome_cliente }} - {{ $agendamentoPrincipal->servico ? $agendamentoPrincipal->servico->nome : 'Serviço' }}">
-                                            <div class="flex flex-col h-full">
-                                                <div class="font-bold text-xs sm:text-sm truncate drop-shadow-md" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
-                                                    {{ strtoupper(substr($agendamentoPrincipal->nome_cliente, 0, 20)) }}
-                                                </div>
-                                                <div class="text-xs font-semibold mt-1 drop-shadow-md" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
-                                                    {{ $agendamentoPrincipal->data_hora->format('H:i') }} - {{ $agendamentoPrincipal->data_hora->copy()->addMinutes($duracao)->format('H:i') }}
-                                                </div>
-                                                @if($agendamentoPrincipal->servico)
-                                                    <div class="text-xs font-medium mt-1 truncate drop-shadow-md" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
-                                                        {{ $agendamentoPrincipal->servico->nome }}
-                                                    </div>
-                                                @endif
-                                                <div class="flex items-center gap-1 mt-auto">
-                                                    @if($agendamentoPrincipal->status == 'agendado')
-                                                        <span class="text-xs bg-white/30 backdrop-blur-sm px-2 py-0.5 rounded font-semibold border border-white/40">⏰</span>
-                                                    @elseif($agendamentoPrincipal->status == 'pre_concluido')
-                                                        <span class="text-xs bg-white/30 backdrop-blur-sm px-2 py-0.5 rounded font-semibold border border-white/40">⏳</span>
-                                                    @elseif($agendamentoPrincipal->status == 'concluido')
-                                                        <span class="text-xs bg-white/30 backdrop-blur-sm px-2 py-0.5 rounded font-semibold border border-white/40">✓</span>
+                                        <div class="absolute top-1 left-1 right-1 rounded-lg shadow-sm p-2 overflow-hidden transition hover:scale-105" 
+                                             style="height: {{ $alturaTotal }}px; z-index: 5; background: var(--brand-secondary); color: var(--brand-on-secondary); border-left: 3px solid rgba(0,0,0,0.1);">
+                                            <div class="flex flex-col h-full justify-between">
+                                                <div>
+                                                    <div class="font-bold text-sm truncate">{{ $agendamentoPrincipal->nome_cliente }}</div>
+                                                    @if($agendamentoPrincipal->servico)
+                                                        <div class="text-xs opacity-90 truncate">{{ $agendamentoPrincipal->servico->nome }}</div>
                                                     @endif
-                                                    <span class="text-xs font-semibold ml-auto drop-shadow-md" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
-                                                        {{ $duracao }}min
-                                                    </span>
+                                                </div>
+                                                <div class="flex items-center justify-between mt-1">
+                                                    <div class="text-xs font-medium">{{ $agendamentoPrincipal->data_hora->format('H:i') }}</div>
+                                                    <div class="text-xs opacity-75">{{ $duracao }}min</div>
+                                                </div>
+                                                <!-- Botões de Ação -->
+                                                <div class="flex gap-1 mt-2">
+                                                    <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.edit', $agendamentoPrincipal) }}'" 
+                                                            class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
+                                                            style="background: rgba(255,255,255,0.1); hover:background: rgba(255,255,255,0.2);"
+                                                            title="Editar">
+                                                        ✏️
+                                                    </button>
+                                                    
+                                                    @if($agendamentoPrincipal->status == 'agendado')
+                                                        <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.concluir', $agendamentoPrincipal) }}'" 
+                                                                class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
+                                                                style="background: rgba(34,197,94,0.2); hover:background: rgba(34,197,94,0.3);"
+                                                                title="Concluir Atendimento">
+                                                            ✅
+                                                        </button>
+                                                    @endif
+                                                    
+                                                    <button onclick="removerAgendamento({{ $agendamentoPrincipal->id }}, event)" 
+                                                            class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
+                                                            style="background: rgba(239,68,68,0.3); hover:background: rgba(239,68,68,0.4);"
+                                                            title="Remover Permanentemente">
+                                                        🗑️
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -280,24 +296,24 @@
     </div>
 
     <!-- Legenda -->
-    <div class="mt-4 bg-white rounded-lg shadow-md p-4">
+    <div class="mt-4 rounded-lg p-4" style="background: var(--brand-surface); border: 1px solid var(--brand-border);">
         <div class="flex flex-wrap items-center gap-4">
-            <span class="text-sm font-semibold text-gray-700">Legenda:</span>
+            <span class="text-sm font-semibold" style="color: var(--text-light);">Legenda:</span>
             <div class="flex items-center gap-2">
-                <div class="w-4 h-4 bg-blue-500 rounded"></div>
-                <span class="text-sm text-gray-600">Agendado</span>
+                <div class="w-4 h-4" style="background: var(--brand-primary); border-radius:6px;"></div>
+                <span class="text-sm" style="color: var(--text-light);">Agendado</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="w-4 h-4 bg-orange-500 rounded"></div>
-                <span class="text-sm text-gray-600">Pré-Concluído</span>
+                <div class="w-4 h-4" style="background: var(--brand-warning); border-radius:6px;"></div>
+                <span class="text-sm" style="color: var(--text-light);">Pré-Concluído</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="w-4 h-4 bg-green-500 rounded"></div>
-                <span class="text-sm text-gray-600">Concluído</span>
+                <div class="w-4 h-4" style="background: var(--brand-success); border-radius:6px;"></div>
+                <span class="text-sm" style="color: var(--text-light);">Concluído</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="w-4 h-4 bg-gray-400 rounded"></div>
-                <span class="text-sm text-gray-600">Cancelado</span>
+                <div class="w-4 h-4" style="background: var(--brand-muted); border-radius:6px;"></div>
+                <span class="text-sm" style="color: var(--text-light);">Cancelado</span>
             </div>
         </div>
     </div>
@@ -313,11 +329,35 @@
         border-radius: 4px;
     }
     .overflow-x-auto::-webkit-scrollbar-thumb {
-        background: #D4AF37;
+        background: var(--brand-secondary);
         border-radius: 4px;
     }
     .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-        background: #B8941F;
+        background: var(--brand-secondary);
+    }
+    
+    /* Esconder atributos onclick visualmente */
+    .cursor-pointer[onclick] {
+        /* Não mostrar o onclick como texto */
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
     }
 </style>
+
+<script>
+function removerAgendamento(id, event) {
+    event.stopPropagation();
+    if(confirm('Tem certeza que deseja remover permanentemente este agendamento?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/agendamentos/' + id + '/deletar';
+        const csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+        form.innerHTML = '<input type=hidden name=_method value=DELETE><input type=hidden name=_token value=' + csrfToken + '>';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 @endsection

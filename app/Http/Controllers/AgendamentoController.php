@@ -267,6 +267,24 @@ class AgendamentoController extends Controller
                     'forma_pagamento_id' => $formaPagamento->id,
                 ], $valores));
             }
+            
+            // Sincronizar sistema de níveis do cliente
+            if ($agendamento->cliente) {
+                $cliente = $agendamento->cliente;
+                $totalGasto = $cliente->agendamentos()
+                    ->whereHas('pagamentos')
+                    ->with('pagamentos')
+                    ->get()
+                    ->sum(function($agendamento) {
+                        // Usar valor_liquido se existir, senão usar valor
+                        return $agendamento->pagamentos->sum('valor_liquido') ?: 
+                               $agendamento->pagamentos->sum('valor');
+                    });
+                
+                // Atualizar cache ou sistema de níveis se existir
+                // Isso garante que o nível seja recalculado automaticamente
+                // quando novos pagamentos forem registrados
+            }
 
             // Profissional: pré-concluído / Proprietária: concluído
             $user = auth()->user();
@@ -313,7 +331,24 @@ class AgendamentoController extends Controller
         $profissionais = Profissional::where('ativo', true)->get();
         $servicos = Servico::where('ativo', true)->get();
         
-        return view('agendamentos.auto-agendar', compact('profissionais', 'servicos'));
+        // Verificar se o usuário logado quer mostrar agenda comprometida
+        $mostrarAgendaComprometida = false;
+        if (auth()->check()) {
+            $user = auth()->user();
+            
+            // Se for profissional, verificar sua própria configuração
+            if ($user->isProfissional() && $user->profissional) {
+                $mostrarAgendaComprometida = $user->mostrar_agenda_comprometida;
+            }
+            // Se for proprietária, verificar se algum profissional tem a opção ativada
+            elseif ($user->isProprietaria()) {
+                $mostrarAgendaComprometida = Profissional::whereHas('user', function($query) {
+                    $query->where('mostrar_agenda_comprometida', true);
+                })->exists();
+            }
+        }
+        
+        return view('agendamentos.auto-agendar', compact('profissionais', 'servicos', 'mostrarAgendaComprometida'));
     }
 
     public function horariosDisponiveis(Request $request)
@@ -352,6 +387,9 @@ class AgendamentoController extends Controller
             
             $horaFim = $horaInicio->copy()->addMinutes($duracaoAg);
             
+            // Debug: mostrar agendamentos existentes
+            \Log::info("Agendamento existente: {$ag->id} - {$horaInicio->format('H:i')} as {$horaFim->format('H:i')} ({$duracaoAg}min)");
+            
             $intervalosOcupados[] = [
                 'inicio' => $horaInicio,
                 'fim' => $horaFim
@@ -366,19 +404,21 @@ class AgendamentoController extends Controller
         
         // Verificar sobreposição com agendamentos existentes
         $disponivel = true;
+        \Log::info("Verificando horário: {$horaDesejadaObj->format('H:i')} as {$horaFimDesejada->format('H:i')} ({$duracao}min)");
+        
         foreach ($intervalosOcupados as $intervalo) {
-            // Verificar se há sobreposição: 
+            // Lógica simples: verifica se há sobreposição real
             // Novo agendamento começa antes do fim do existente E termina depois do início do existente
-            // OU começa exatamente no mesmo horário
-            // OU termina exatamente no mesmo horário
-            if (($horaDesejadaObj->lt($intervalo['fim']) && $horaFimDesejada->gt($intervalo['inicio'])) ||
-                $horaDesejadaObj->eq($intervalo['inicio']) ||
-                ($horaDesejadaObj->gte($intervalo['inicio']) && $horaDesejadaObj->lt($intervalo['fim'])) ||
-                ($horaFimDesejada->gt($intervalo['inicio']) && $horaFimDesejada->lte($intervalo['fim']))) {
+            $sobreposicao = $horaDesejadaObj->lt($intervalo['fim']) && $horaFimDesejada->gt($intervalo['inicio']);
+            \Log::info("Conflito com {$intervalo['inicio']->format('H:i')}-{$intervalo['fim']->format('H:i')}: " . ($sobreposicao ? 'SIM' : 'NÃO'));
+            
+            if ($sobreposicao) {
                 $disponivel = false;
                 break;
             }
         }
+        
+        \Log::info("Resultado: " . ($disponivel ? 'DISPONÍVEL' : 'INDISPONÍVEL'));
 
         $sugestoes = [];
         if (!$disponivel) {
@@ -439,6 +479,126 @@ class AgendamentoController extends Controller
             'disponivel' => $disponivel,
             'sugestoes' => $sugestoes
         ]);
+    }
+
+    public function horariosDisponiveisDia(Request $request)
+    {
+        $request->validate([
+            'profissional_id' => 'required|exists:profissionais,id',
+            'servico_id' => 'required|exists:servicos,id',
+            'data' => 'required|date',
+            'from' => 'nullable',
+            'to' => 'nullable',
+            'step' => 'nullable|integer'
+        ]);
+
+        $profissionalId = $request->profissional_id;
+        $servicoId = $request->servico_id;
+        $data = $request->data;
+        $from = $request->input('from', '09:00');
+        $to = $request->input('to', '17:30');
+        $step = $request->input('step', 30);
+
+        $servico = Servico::find($servicoId);
+        $duracao = $servico->duracao_minutos ?? 30;
+
+        // Verificar se o usuário quer mostrar agenda comprometida
+        // TEMPORÁRIO: Sempre buscar agendamentos existentes
+        $mostrarAgendaComprometida = true;
+        
+        /*
+        $mostrarAgendaComprometida = false;
+        if (auth()->check()) {
+            $user = auth()->user();
+            
+            // Se for profissional, verificar sua própria configuração
+            if ($user->isProfissional() && $user->profissional) {
+                $mostrarAgendaComprometida = $user->mostrar_agenda_comprometida ?? false;
+            }
+            // Se for proprietária, verificar se algum profissional tem a opção ativada
+            elseif ($user->isProprietaria()) {
+                $mostrarAgendaComprometida = Profissional::whereHas('user', function($query) {
+                    $query->where('mostrar_agenda_comprometida', true);
+                })->exists();
+            }
+        }
+        */
+        
+        // Debug: verificar configuração
+        \Log::info("mostrar_agenda_comprometida: " . ($mostrarAgendaComprometida ? 'TRUE' : 'FALSE'));
+
+        // Buscar agendamentos do profissional na data
+        // TEMPORÁRIO: Sempre buscar agendamentos para teste
+        $agendamentos = Agendamento::where('profissional_id', $profissionalId)
+            ->whereDate('data_hora', $data)
+            ->where('status', '!=', 'cancelado')
+            ->with('servicos')
+            ->get();
+        
+        /*
+        if ($mostrarAgendaComprometida) {
+            // Modo público: mostrar agendamentos existentes
+            $agendamentos = Agendamento::where('profissional_id', $profissionalId)
+                ->whereDate('data_hora', $data)
+                ->where('status', '!=', 'cancelado')
+                ->with('servicos')
+                ->get();
+        } else {
+            // Modo privado: não mostrar agendamentos existentes
+            $agendamentos = collect([]);
+        }
+        */
+
+        $intervalosOcupados = [];
+        foreach ($agendamentos as $ag) {
+            $horaInicio = \Carbon\Carbon::parse($ag->data_hora);
+            $duracaoAg = 0;
+            foreach ($ag->servicos as $s) {
+                $duracaoAg += $s->duracao_minutos ?? 30;
+            }
+            if ($duracaoAg == 0) $duracaoAg = 30;
+            $horaFim = $horaInicio->copy()->addMinutes($duracaoAg);
+            
+            $intervalosOcupados[] = [
+                'inicio' => $horaInicio,
+                'fim' => $horaFim
+            ];
+        }
+
+        // Gerar timeslots entre from e to com step
+        $result = [];
+        $fromParts = explode(':', $from);
+        $toParts = explode(':', $to);
+        $cur = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "$data {$fromParts[0]}:{$fromParts[1]}:00");
+        $end = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "$data {$toParts[0]}:{$toParts[1]}:00");
+        while ($cur <= $end) {
+            $horaFimSug = $cur->copy()->addMinutes($duracao);
+            $disponivel = true;
+            
+            // Só verificar conflitos se estiver em modo público
+            if ($mostrarAgendaComprometida) {
+                foreach ($intervalosOcupados as $intervalo) {
+                    $sobreposicao = $cur->lt($intervalo['fim']) && $horaFimSug->gt($intervalo['inicio']);
+                    if ($sobreposicao) {
+                        $disponivel = false;
+                        break;
+                    }
+                }
+            }
+            
+            // Em modo privado, todos aparecem como disponíveis
+            if (!$mostrarAgendaComprometida) {
+                $disponivel = true;
+            }
+            
+            $result[] = [
+                'hora' => $cur->format('H:i'),
+                'disponivel' => $disponivel
+            ];
+            $cur->addMinutes($step);
+        }
+
+        return response()->json(['timeslots' => $result]);
     }
 
     public function storeAutoAgendamento(Request $request)

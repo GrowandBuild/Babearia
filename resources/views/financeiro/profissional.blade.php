@@ -10,81 +10,61 @@
         <p class="text-sm sm:text-base text-gray-600 mt-1">Acompanhe seus ganhos em tempo real</p>
     </div>
 
-    <!-- Cards de Ganhos por Período -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 px-4 sm:px-0">
-        <!-- Hoje -->
-        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-vm-gold">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <h3 class="text-xs sm:text-sm font-semibold text-gray-600 uppercase">Hoje</h3>
-                    <p class="text-2xl sm:text-3xl font-bold text-green-600 mt-2">R$ {{ number_format($ganhoDia, 2, ',', '.') }}</p>
-                </div>
-                <span class="text-2xl">📅</span>
+    <!-- Cards de Ganhos por Período (compactos) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 px-2 sm:px-0">
+        <div class="flex items-center gap-3 p-3 rounded-lg shadow-sm" style="background: rgba(34,197,94,0.06); border-left: 4px solid var(--brand-success);">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(34,197,94,0.15);">
+                <span class="text-sm">📅</span>
             </div>
-            @if($preConcluidoDia > 0)
-                <div class="mt-3 pt-3 border-t border-gray-200">
-                    <p class="text-xs text-orange-600 font-medium">+ R$ {{ number_format($preConcluidoDia, 2, ',', '.') }} aguardando</p>
-                </div>
-            @endif
-            <div class="mt-2 text-xs text-gray-500">
-                {{ $atendimentosDia }} atendimentos
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-gray-600">Hoje</div>
+                <div class="mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($ganhoDia, 2, ',', '.') }}</div>
+                @if($preConcluidoDia > 0)
+                    <div class="mt-1 text-xs text-gray-500">+ R$ {{ number_format($preConcluidoDia, 2, ',', '.') }} aguardando</div>
+                @endif
+                <div class="mt-1 text-xs text-gray-500">{{ $atendimentosDia }} atendimentos</div>
             </div>
         </div>
 
-        <!-- Semana -->
-        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-blue-500">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <h3 class="text-xs sm:text-sm font-semibold text-gray-600 uppercase">Esta Semana</h3>
-                    <p class="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">R$ {{ number_format($ganhoSemana, 2, ',', '.') }}</p>
-                </div>
-                <span class="text-2xl">📊</span>
+        <div class="flex items-center gap-3 p-3 rounded-lg shadow-sm" style="background: rgba(250,130,49,0.04); border-left: 4px solid var(--brand-warning);">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(250,130,49,0.12);">
+                <span class="text-sm">📊</span>
             </div>
-            @if($preConcluidoSemana > 0)
-                <div class="mt-3 pt-3 border-t border-gray-200">
-                    <p class="text-xs text-orange-600 font-medium">+ R$ {{ number_format($preConcluidoSemana, 2, ',', '.') }} aguardando</p>
-                </div>
-            @endif
-            <div class="mt-2 text-xs text-gray-500">
-                {{ $atendimentosSemana }} atendimentos
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-gray-600">Esta Semana</div>
+                <div class="mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($ganhoSemana, 2, ',', '.') }}</div>
+                @if($preConcluidoSemana > 0)
+                    <div class="mt-1 text-xs text-gray-500">+ R$ {{ number_format($preConcluidoSemana, 2, ',', '.') }} aguardando</div>
+                @endif
+                <div class="mt-1 text-xs text-gray-500">{{ $atendimentosSemana }} atendimentos</div>
             </div>
         </div>
 
-        <!-- Mês -->
-        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-purple-500">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <h3 class="text-xs sm:text-sm font-semibold text-gray-600 uppercase">Este Mês</h3>
-                    <p class="text-2xl sm:text-3xl font-bold text-purple-600 mt-2">R$ {{ number_format($ganhoMes, 2, ',', '.') }}</p>
-                </div>
-                <span class="text-2xl">📈</span>
+        <div class="flex items-center gap-3 p-3 rounded-lg shadow-sm" style="background: rgba(59,130,246,0.04); border-left: 4px solid var(--brand-primary);">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(59,130,246,0.12);">
+                <span class="text-sm">📈</span>
             </div>
-            @if($preConcluidoMes > 0)
-                <div class="mt-3 pt-3 border-t border-gray-200">
-                    <p class="text-xs text-orange-600 font-medium">+ R$ {{ number_format($preConcluidoMes, 2, ',', '.') }} aguardando</p>
-                </div>
-            @endif
-            <div class="mt-2 text-xs text-gray-500">
-                {{ $atendimentosMes }} atendimentos
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-gray-600">Este Mês</div>
+                <div class="mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($ganhoMes, 2, ',', '.') }}</div>
+                @if($preConcluidoMes > 0)
+                    <div class="mt-1 text-xs text-gray-500">+ R$ {{ number_format($preConcluidoMes, 2, ',', '.') }} aguardando</div>
+                @endif
+                <div class="mt-1 text-xs text-gray-500">{{ $atendimentosMes }} atendimentos</div>
             </div>
         </div>
 
-        <!-- Ano -->
-        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-indigo-500">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <h3 class="text-xs sm:text-sm font-semibold text-gray-600 uppercase">Este Ano</h3>
-                    <p class="text-2xl sm:text-3xl font-bold text-indigo-600 mt-2">R$ {{ number_format($ganhoAno, 2, ',', '.') }}</p>
-                </div>
-                <span class="text-2xl">🎯</span>
+        <div class="flex items-center gap-3 p-3 rounded-lg shadow-sm" style="background: rgba(139,92,246,0.04); border-left: 4px solid var(--brand-accent);">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(139,92,246,0.12);">
+                <span class="text-sm">🎯</span>
             </div>
-            @if($preConcluidoAno > 0)
-                <div class="mt-3 pt-3 border-t border-gray-200">
-                    <p class="text-xs text-orange-600 font-medium">+ R$ {{ number_format($preConcluidoAno, 2, ',', '.') }} aguardando</p>
-                </div>
-            @endif
-            <div class="mt-2 text-xs text-gray-500">
-                {{ $atendimentosAno }} atendimentos
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-gray-600">Este Ano</div>
+                <div class="mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($ganhoAno, 2, ',', '.') }}</div>
+                @if($preConcluidoAno > 0)
+                    <div class="mt-1 text-xs text-gray-500">+ R$ {{ number_format($preConcluidoAno, 2, ',', '.') }} aguardando</div>
+                @endif
+                <div class="mt-1 text-xs text-gray-500">{{ $atendimentosAno }} atendimentos</div>
             </div>
         </div>
     </div>
@@ -98,13 +78,12 @@
                 <div class="flex items-center gap-3">
                     <div class="w-20 sm:w-24 text-xs sm:text-sm font-medium text-gray-600">{{ $mes['mes'] }}</div>
                     <div class="flex-1">
-                        <div class="bg-gray-200 rounded-full h-8 relative overflow-hidden">
-                            @php
-                                $maxValor = collect($evolucaoMensal)->max('total');
-                                $percentual = $maxValor > 0 ? ($mes['total'] / $maxValor) * 100 : 0;
-                            @endphp
-                            <div class="gradient-gold h-full rounded-full transition-all duration-500" 
-                                 style="width: {{ $percentual }}%"></div>
+                                    <div class="bg-gray-200 rounded-full h-8 relative overflow-hidden">
+                                        @php
+                                            $maxValor = collect($evolucaoMensal)->max('total');
+                                            $percentual = $maxValor > 0 ? ($mes['total'] / $maxValor) * 100 : 0;
+                                        @endphp
+                                        <div class="h-full rounded-full transition-all duration-500" style="width: {{ $percentual }}%; background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary));"></div>
                             <div class="absolute inset-0 flex items-center px-3">
                                 <span class="text-xs sm:text-sm font-bold {{ $mes['total'] > 0 ? 'text-white' : 'text-gray-600' }}">
                                     R$ {{ number_format($mes['total'], 2, ',', '.') }}

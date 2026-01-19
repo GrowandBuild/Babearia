@@ -33,7 +33,7 @@
             <!-- Logo -->
             <div class="mb-6 sm:mb-8 animate-fade-in">
                 <a href="/" class="transition-transform duration-300 hover:scale-105 block">
-                    <img src="{{ asset('logo.svg') }}" alt="Esmalteria Vida Maria" class="h-20 sm:h-28 w-auto mx-auto">
+                    <x-site-logo class="h-20 sm:h-28 w-auto mx-auto" />
                 </a>
             </div>
 

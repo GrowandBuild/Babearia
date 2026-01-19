@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class ClienteController extends Controller
 {
@@ -88,6 +91,107 @@ class ClienteController extends Controller
         
         return redirect()->route('clientes.index')
             ->with('success', 'Cliente removido com sucesso!');
+    }
+
+    public function createAccess(Cliente $cliente)
+    {
+        if ($cliente->user_id) {
+            return redirect()->route('clientes.index')
+                ->with('error', 'Este cliente já possui acesso ao sistema!');
+        }
+
+        return view('clientes.create-access', compact('cliente'));
+    }
+
+    public function editAccess(Cliente $cliente)
+    {
+        if (!$cliente->user_id) {
+            return redirect()->route('clientes.index')
+                ->with('error', 'Este cliente não possui acesso ao sistema!');
+        }
+
+        $user = $cliente->user;
+        return view('clientes.edit-access', compact('cliente', 'user'));
+    }
+
+    public function storeAccess(Request $request, Cliente $cliente)
+    {
+        if ($cliente->user_id) {
+            return redirect()->route('clientes.index')
+                ->with('error', 'Este cliente já possui acesso ao sistema!');
+        }
+
+        $request->validate([
+            'username' => ['required', 'string', 'max:255', 'unique:users,username'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        // Create user account
+        $user = User::create([
+            'name' => $cliente->nome,
+            'username' => $request->username,
+            'phone' => $cliente->telefone,
+            'email' => $cliente->email,
+            'password' => Hash::make($request->password),
+            'tipo' => 'cliente',
+        ]);
+
+        // Link user to client
+        $cliente->update(['user_id' => $user->id]);
+
+        return redirect()->route('clientes.index')
+            ->with('success', "Acesso criado com sucesso! Usuário: {$request->username}");
+    }
+
+    public function updateAccess(Request $request, Cliente $cliente)
+    {
+        if (!$cliente->user_id) {
+            return redirect()->route('clientes.index')
+                ->with('error', 'Este cliente não possui acesso ao sistema!');
+        }
+
+        $user = $cliente->user;
+
+        $request->validate([
+            'username' => ['required', 'string', 'max:255', 'unique:users,username,' . $user->id],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $userData = [
+            'username' => $request->username,
+        ];
+
+        // Update password only if provided
+        if ($request->filled('password')) {
+            $userData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($userData);
+
+        return redirect()->route('clientes.index')
+            ->with('success', "Acesso atualizado com sucesso! Usuário: {$request->username}");
+    }
+
+    public function updateAvatar(Request $request, Cliente $cliente)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Delete old avatar if exists
+        if ($cliente->avatar && Storage::disk('public')->exists($cliente->avatar)) {
+            Storage::disk('public')->delete($cliente->avatar);
+        }
+
+        // Upload new avatar
+        $avatarPath = $request->file('avatar')->store('avatars/clientes', 'public');
+        $cliente->update(['avatar' => $avatarPath]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Avatar atualizado com sucesso!',
+            'avatar_url' => $cliente->avatar_url
+        ]);
     }
 }
 
