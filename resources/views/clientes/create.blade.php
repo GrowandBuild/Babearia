@@ -48,7 +48,53 @@
                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('observacoes') }}</textarea>
                     </div>
 
-                    <div class="flex gap-3">
+                    <!-- Seção de Pacotes -->
+                    <div class="border-t pt-4">
+                        <div class="flex items-center mb-4">
+                            <input type="checkbox" id="is_package_client" name="is_package_client" value="1" 
+                                   {{ old('is_package_client') ? 'checked' : '' }}
+                                   class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="is_package_client" class="ml-2 block text-sm text-gray-900">
+                                Cliente comprou pacote de serviços
+                            </label>
+                        </div>
+
+                        <div id="package_fields" class="{{ old('is_package_client') ? '' : 'hidden' }} space-y-4 bg-gray-50 p-4 rounded-lg">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Total de Serviços *</label>
+                                    <input type="number" name="package_total_services" value="{{ old('package_total_services', 4) }}" min="1"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Valor do Pacote (R$) *</label>
+                                    <input type="number" name="package_price" value="{{ old('package_price', 80.00) }}" min="0" step="0.01"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Data Início</label>
+                                    <input type="date" name="package_start_date" value="{{ old('package_start_date', now()->format('Y-m-d')) }}"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Data Fim (Opcional)</label>
+                                    <input type="date" name="package_end_date" value="{{ old('package_end_date') }}"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Observações do Pacote</label>
+                                <textarea name="package_observations" rows="2" placeholder="Ex: Pacote promocional 4 cortes por R$ 80,00"
+                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('package_observations') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 mt-6">
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
                             Cadastrar
                         </button>
@@ -62,4 +108,21 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('is_package_client');
+    const packageFields = document.getElementById('package_fields');
+    
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            packageFields.classList.remove('hidden');
+        } else {
+            packageFields.classList.add('hidden');
+        }
+    });
+});
+</script>
+@endpush
 

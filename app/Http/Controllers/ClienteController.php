@@ -31,9 +31,28 @@ class ClienteController extends Controller
             'instagram' => 'nullable|string|max:50|regex:/^[a-zA-Z0-9._]+$/',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'observacoes' => 'nullable|string',
+            'is_package_client' => 'nullable|boolean',
+            'package_total_services' => 'required_if:is_package_client,1|nullable|integer|min:1',
+            'package_price' => 'required_if:is_package_client,1|nullable|numeric|min:0',
+            'package_start_date' => 'required_if:is_package_client,1|nullable|date',
+            'package_end_date' => 'nullable|date|after_or_equal:package_start_date',
+            'package_observations' => 'nullable|string',
         ]);
 
         $data = $request->except('avatar');
+        
+        // Processar campos de pacote
+        $data['is_package_client'] = $request->has('is_package_client');
+        if (!$data['is_package_client']) {
+            $data['package_total_services'] = null;
+            $data['package_used_services'] = 0;
+            $data['package_price'] = null;
+            $data['package_start_date'] = null;
+            $data['package_end_date'] = null;
+            $data['package_observations'] = null;
+        } else {
+            $data['package_used_services'] = 0;
+        }
         
         // Upload avatar se fornecido
         if ($request->hasFile('avatar')) {

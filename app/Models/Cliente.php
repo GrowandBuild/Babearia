@@ -19,6 +19,13 @@ class Cliente extends Model
         'instagram',
         'avatar',
         'observacoes',
+        'is_package_client',
+        'package_total_services',
+        'package_used_services',
+        'package_price',
+        'package_start_date',
+        'package_end_date',
+        'package_observations',
     ];
 
     // Relacionamentos
@@ -77,6 +84,65 @@ class Cliente extends Model
         }
 
         return $total;
+    }
+
+    // Métodos para gerenciar pacotes
+    public function isPackageClient()
+    {
+        return $this->is_package_client;
+    }
+
+    public function getRemainingServices()
+    {
+        if (!$this->isPackageClient()) {
+            return 0;
+        }
+        
+        return max(0, $this->package_total_services - $this->package_used_services);
+    }
+
+    public function hasPackageServices()
+    {
+        return $this->isPackageClient() && $this->getRemainingServices() > 0;
+    }
+
+    public function usePackageService()
+    {
+        if ($this->hasPackageServices()) {
+            $this->increment('package_used_services');
+            return true;
+        }
+        return false;
+    }
+
+    public function getPackageStatusAttribute()
+    {
+        if (!$this->isPackageClient()) {
+            return 'Cliente Comum';
+        }
+
+        $remaining = $this->getRemainingServices();
+        
+        if ($remaining <= 0) {
+            return 'Pacote Esgotado';
+        } elseif ($this->package_end_date && now()->greaterThan($this->package_end_date)) {
+            return 'Pacote Expirado';
+        } else {
+            return "{$remaining} de {$this->package_total_services} restantes";
+        }
+    }
+
+    // Verificar se pacote está válido
+    public function isPackageValid()
+    {
+        if (!$this->isPackageClient()) {
+            return false;
+        }
+
+        $hasRemainingServices = $this->getRemainingServices() > 0;
+        $notExpired = !$this->package_end_date || now()->lessThanOrEqualTo($this->package_end_date);
+        
+        return $hasRemainingServices && $notExpired;
     }
 }
 

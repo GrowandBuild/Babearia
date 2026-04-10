@@ -21,6 +21,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pacote</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Atendimentos</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
                         </tr>
@@ -49,6 +50,20 @@
                                 <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $cliente->nome }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $cliente->telefone }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $cliente->email }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($cliente->is_package_client)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            @if($cliente->isPackageValid())
+                                                bg-green-100 text-green-800
+                                            @else
+                                                bg-red-100 text-red-800
+                                            @endif">
+                                            {{ $cliente->package_status }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 text-xs">-</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $cliente->agendamentos_count }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <a href="{{ route('clientes.show', $cliente) }}" class="text-blue-600 hover:text-blue-900 mr-3">Ver</a>
@@ -69,7 +84,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                <td colspan="7" class="px-6 py-4 text-center text-gray-500">
                                     Nenhum cliente cadastrado
                                 </td>
                             </tr>
