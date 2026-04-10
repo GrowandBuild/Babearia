@@ -4,6 +4,15 @@
 
 @section('content')
 <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+    <!-- Botão de Teste -->
+    <div class="mb-4 p-4 bg-red-500 text-white rounded-lg text-center">
+        <h3 class="text-lg font-bold mb-2">BOTÃO DE TESTE</h3>
+        <p>Se você está vendo esta mensagem, a view agenda.blade.php está sendo carregada corretamente!</p>
+        <button onclick="alert('Teste funcionando!')" class="mt-2 px-4 py-2 bg-white text-red-500 rounded font-bold">
+            Clique para Testar
+        </button>
+    </div>
+    
     <!-- Header com Navegação e Filtros -->
     <div class="shadow-lg mb-4 sm:mb-6 rounded-lg site-header" style="background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary)); color: var(--brand-header-text);">
         <div class="p-4 sm:p-6">
@@ -267,20 +276,19 @@
                                                         ✏️
                                                     </button>
                                                     
-                                                    @if($agendamentoPrincipal->status == 'agendado')
+                                                    <!-- Botões sempre visíveis para teste -->
                                                         <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.faturar', $agendamentoPrincipal) }}'" 
                                                                 class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                                style="background: rgba(16,185,129,0.2); hover:background: rgba(16,185,129,0.3);"
+                                                                style="background: rgba(16,185,129,0.5); hover:background: rgba(16,185,129,0.7);"
                                                                 title="Finalizar e Faturar">
                                                             <span class="opacity-90">Finalizar</span>
                                                         </button>
                                                         <button onclick="event.stopPropagation(); if(confirm('Deseja cancelar este agendamento?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
                                                                 class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                                style="background: rgba(239, 68, 68,0.2); hover:background: rgba(239, 68, 68,0.3);"
+                                                                style="background: rgba(239, 68, 68,0.5); hover:background: rgba(239, 68, 68,0.7);"
                                                                 title="Cancelar Agendamento">
                                                             <span class="opacity-90">Cancelar</span>
                                                         </button>
-                                                    @endif
                                                     
                                                     <button onclick="removerAgendamento({{ $agendamentoPrincipal->id }}, event)" 
                                                             class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
