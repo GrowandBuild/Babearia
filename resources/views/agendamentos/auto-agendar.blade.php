@@ -202,7 +202,46 @@ body {
                 <h2 class="text-xl font-bold mb-4">1. Escolha o Serviço</h2>
                 <input type="hidden" name="servico_id" id="servico_id_hidden" value="{{ old('servico_id') }}">
                 <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4" id="servicos-container">
-                    @if($servicos->isEmpty())
+                    <!-- Serviço de Pacote em Destaque -->
+                    @if($servicoPacote)
+                        <label class="cursor-pointer servico-tile border-4 rounded-lg p-4 hover:border-opacity-60 transition-all duration-200 relative overflow-hidden" style="border-color: #10b981; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);" data-id="{{ $servicoPacote->id }}" data-preco="0" data-is-pacote="true">
+                            <input type="radio" name="servico_radio" value="{{ $servicoPacote->id }}" class="sr-only">
+                            
+                            <!-- Badge de Pacote -->
+                            <div class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                                SEU PACOTE
+                            </div>
+                            
+                            <!-- Ícone de Pacote -->
+                            <div class="servico-image mb-3 flex items-center justify-center h-32 bg-green-100 rounded-lg">
+                                <svg class="w-16 h-16 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            
+                            <h3 class="font-bold text-lg mb-2 text-green-800">{{ $servicoPacote->nome }}</h3>
+                            <p class="text-gray-700 text-sm mb-3">{{ $servicoPacote->descricao }}</p>
+                            
+                            <!-- Info do Pacote -->
+                            <div class="bg-white/70 rounded-lg p-3 mb-3">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm font-semibold text-green-700">Serviços restantes:</span>
+                                    <span class="text-lg font-bold text-green-800">{{ $servicoPacote->pacote_info['restantes'] }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-gray-600">
+                                    <span>{{ $servicoPacote->pacote_info['usados'] }} usados de {{ $servicoPacote->pacote_info['total'] }}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    Valor pago: R$ {{ number_format($servicoPacote->pacote_info['valor_pago'], 2, ',', '.') }}
+                                </div>
+                            </div>
+                            
+                            <p class="text-2xl font-bold text-green-600">GRÁTIS</p>
+                            <p class="text-sm text-gray-500 mt-1">{{ $servicoPacote->duracao_minutos }} min</p>
+                        </label>
+                    @endif
+                    
+                    @if($servicos->isEmpty() && !$servicoPacote)
                         <div class="col-span-full text-center p-8 bg-red-50 border border-red-200 rounded-lg">
                             <h3 class="text-lg font-semibold text-red-800 mb-2">Nenhum serviço disponível</h3>
                             <p class="text-red-600">Não há serviços cadastrados ou ativos no sistema.</p>
@@ -210,7 +249,7 @@ body {
                         </div>
                     @else
                         @foreach($servicos as $servico)
-                            <label class="cursor-pointer servico-tile border rounded-lg p-4 hover:border-opacity-60 transition-all duration-200" style="border-color: {{ \App\Models\Setting::get('brand.secondary', '#3b82f6') }}; background-color: {{ \App\Models\Setting::get('brand.surface', '#f8fafc') }};" data-id="{{ $servico->id }}" data-preco="{{ $servico->preco ?? 0 }}">
+                            <label class="cursor-pointer servico-tile border rounded-lg p-4 hover:border-opacity-60 transition-all duration-200 {{ $servicoPacote ? 'opacity-75' : '' }}" style="border-color: {{ \App\Models\Setting::get('brand.secondary', '#3b82f6') }}; background-color: {{ \App\Models\Setting::get('brand.surface', '#f8fafc') }};" data-id="{{ $servico->id }}" data-preco="{{ $servico->preco ?? 0 }}">
                                 <input type="radio" name="servico_radio" value="{{ $servico->id }}" class="sr-only" {{ old('servico_id') == $servico->id ? 'checked' : '' }}>
                                 
                                 @if($servico->imagem_url)
@@ -656,8 +695,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (servicoSelecionado) {
             resumoServico.textContent = servicoSelecionado.nome;
             confirmServico.textContent = servicoSelecionado.nome;
-            resumoPreco.textContent = `R$ ${servicoSelecionado.preco.toFixed(2).replace('.', ',')}`;
-            confirmPreco.textContent = `R$ ${servicoSelecionado.preco.toFixed(2).replace('.', ',')}`;
+            
+            if (servicoSelecionado.isPacote) {
+                resumoPreco.textContent = 'GRÁTIS (Pacote)';
+                confirmPreco.textContent = 'GRÁTIS (Pacote)';
+                confirmPreco.className = 'text-xl font-bold text-green-600';
+            } else {
+                resumoPreco.textContent = `R$ ${servicoSelecionado.preco.toFixed(2).replace('.', ',')}`;
+                confirmPreco.textContent = `R$ ${servicoSelecionado.preco.toFixed(2).replace('.', ',')}`;
+                confirmPreco.className = 'text-xl font-bold text-blue-600';
+            }
         }
         
         if (dataSelecionada) {
@@ -1037,10 +1084,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('servico_id_hidden').value = radio.value;
         console.log('Campo servico_id_hidden atualizado para:', document.getElementById('servico_id_hidden').value);
         
+        // Verificar se é serviço de pacote
+        const isPacote = tile.dataset.isPacote === 'true';
+        
         servicoSelecionado = {
-            id: parseInt(radio.value),
+            id: radio.value,
             nome: tile.querySelector('h3').textContent,
-            preco: parseFloat(tile.dataset.preco)
+            preco: parseFloat(tile.dataset.preco),
+            isPacote: isPacote
         };
         
         console.log('Serviço selecionado:', servicoSelecionado);

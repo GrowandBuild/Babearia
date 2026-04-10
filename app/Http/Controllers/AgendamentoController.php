@@ -331,10 +331,41 @@ class AgendamentoController extends Controller
         $profissionais = Profissional::where('ativo', true)->get();
         $servicos = Servico::where('ativo', true)->get();
         
-        // Verificar se o usuário logado quer mostrar agenda comprometida
-        $mostrarAgendaComprometida = false;
+        // Verificar se o usuário logado tem pacote ativo
+        $pacoteCliente = null;
+        $servicoPacote = null;
+        
         if (auth()->check()) {
             $user = auth()->user();
+            
+            // Se for cliente, verificar se tem pacote
+            if ($user->isCliente() && $user->cliente) {
+                $cliente = $user->cliente;
+                
+                if ($cliente->isPackageValid()) {
+                    $pacoteCliente = $cliente;
+                    
+                    // Criar um serviço virtual para o pacote
+                    $servicoPacote = (object) [
+                        'id' => 'pacote_' . $cliente->id,
+                        'nome' => 'Seu Pacote de Serviços',
+                        'descricao' => $cliente->package_observations ?? 'Pacote especial com ' . $cliente->getRemainingServices() . ' serviços restantes',
+                        'preco' => 0, // Não cobra, já foi pago
+                        'duracao_minutos' => 30, // Tempo padrão
+                        'imagem_url' => null,
+                        'is_pacote' => true,
+                        'pacote_info' => [
+                            'total' => $cliente->package_total_services,
+                            'usados' => $cliente->package_used_services,
+                            'restantes' => $cliente->getRemainingServices(),
+                            'valor_pago' => $cliente->package_price
+                        ]
+                    ];
+                }
+            }
+            
+            // Verificar se o usuário logado quer mostrar agenda comprometida
+            $mostrarAgendaComprometida = false;
             
             // Se for profissional, verificar sua própria configuração
             if ($user->isProfissional() && $user->profissional) {
@@ -346,9 +377,11 @@ class AgendamentoController extends Controller
                     $query->where('mostrar_agenda_comprometida', true);
                 })->exists();
             }
+        } else {
+            $mostrarAgendaComprometida = false;
         }
         
-        return view('agendamentos.auto-agendar', compact('profissionais', 'servicos', 'mostrarAgendaComprometida'));
+        return view('agendamentos.auto-agendar', compact('profissionais', 'servicos', 'pacoteCliente', 'servicoPacote', 'mostrarAgendaComprometida'));
     }
 
     public function horariosDisponiveis(Request $request)
