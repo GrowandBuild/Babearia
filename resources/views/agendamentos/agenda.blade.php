@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
     @if(auth()->user()->isProprietaria() || auth()->user()->isAdmin())
     const user = auth()->user();
     if ($user->isProprietaria() || $user->isAdmin()) {
-        // Adicionar clique nos cards de agendamento
+        // Adicionar botões simples nos agendamentos
         document.querySelectorAll('td.relative').forEach(function(cell) {
             const agendamentoDiv = cell.querySelector('div.absolute');
             if (!agendamentoDiv) return;
@@ -368,49 +368,67 @@ document.addEventListener('DOMContentLoaded', function() {
             const status = agendamentoDiv.style.background.includes('green') ? 'concluido' : 
                           agendamentoDiv.style.background.includes('orange') ? 'pre_concluido' : 'agendado';
             
-            // Só permitir clique se não estiver concluído
+            // Criar container para botões
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = `
+                position: absolute;
+                bottom: 4px;
+                left: 4px;
+                right: 4px;
+                display: flex;
+                gap: 4px;
+                z-index: 20;
+            `;
+            
+            // Botão Finalizar
             if (status !== 'concluido' && status !== 'cancelado') {
-                agendamentoDiv.style.cursor = 'pointer';
-                agendamentoDiv.style.border = '2px solid #10b981';
-                agendamentoDiv.style.transition = 'all 0.2s ease';
-                
-                // Adicionar indicador visual
-                const indicator = document.createElement('div');
-                indicator.innerHTML = 'FINALIZAR';
-                indicator.style.cssText = `
-                    position: absolute;
-                    top: 8px;
-                    right: 8px;
+                const btnFinalizar = document.createElement('button');
+                btnFinalizar.innerHTML = 'Finalizar';
+                btnFinalizar.style.cssText = `
+                    flex: 1;
                     background: #10b981;
                     color: white;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    font-size: 11px;
+                    border: none;
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                    font-size: 10px;
                     font-weight: bold;
-                    z-index: 10;
+                    cursor: pointer;
                 `;
-                agendamentoDiv.style.position = 'relative';
-                agendamentoDiv.appendChild(indicator);
-                
-                // Eventos de hover
-                agendamentoDiv.addEventListener('mouseenter', function() {
-                    this.style.transform = 'scale(1.02)';
-                    this.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
-                });
-                
-                agendamentoDiv.addEventListener('mouseleave', function() {
-                    this.style.transform = 'scale(1)';
-                    this.style.boxShadow = '';
-                });
-                
-                // Evento de clique
-                agendamentoDiv.addEventListener('click', function(e) {
-                    e.preventDefault();
+                btnFinalizar.onclick = function(e) {
                     e.stopPropagation();
-                    console.log('Clicando para finalizar agendamento:', agendamentoId);
-                    window.location.href = '/agendamentos/' + agendamentoId + '/finalizar';
-                });
+                    window.location.href = '/agendamentos/' + agendamentoId + '/faturar';
+                };
+                buttonContainer.appendChild(btnFinalizar);
             }
+            
+            // Botão Cancelar
+            if (status !== 'concluido' && status !== 'cancelado') {
+                const btnCancelar = document.createElement('button');
+                btnCancelar.innerHTML = 'Cancelar';
+                btnCancelar.style.cssText = `
+                    flex: 1;
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                    font-size: 10px;
+                    font-weight: bold;
+                    cursor: pointer;
+                `;
+                btnCancelar.onclick = function(e) {
+                    e.stopPropagation();
+                    if (confirm('Deseja cancelar este agendamento?')) {
+                        window.location.href = '/agendamentos/' + agendamentoId + '/cancelar';
+                    }
+                };
+                buttonContainer.appendChild(btnCancelar);
+            }
+            
+            // Adicionar botões ao agendamento
+            agendamentoDiv.style.position = 'relative';
+            agendamentoDiv.appendChild(buttonContainer);
         });
     }
     @endif

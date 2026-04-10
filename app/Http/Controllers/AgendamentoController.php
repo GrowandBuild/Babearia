@@ -253,6 +253,45 @@ class AgendamentoController extends Controller
         return view('admin.finalizar-agendamento', compact('agendamento'));
     }
 
+    // Faturamento rápido
+    public function faturamentoRapido(Agendamento $agendamento)
+    {
+        // Verificar permissões
+        $user = auth()->user();
+        if (!$user->isProprietaria() && !$user->isAdmin()) {
+            return redirect()->route('agendamentos.agenda')
+                ->with('error', 'Você não tem permissão para faturar');
+        }
+        
+        return view('agendamentos.faturamento-rapido', compact('agendamento'));
+    }
+
+    // Processar faturamento rápido
+    public function finalizarPagamentoRapido(Request $request, Agendamento $agendamento)
+    {
+        $request->validate([
+            'forma_pagamento' => 'required|string|in:pix,dinheiro,debito,credito',
+            'valor' => 'required|numeric|min:0',
+        ]);
+
+        // Atualizar status
+        $agendamento->status = 'concluido';
+        $agendamento->save();
+
+        // Criar pagamento
+        $pagamento = \App\Models\Pagamento::create([
+            'agendamento_id' => $agendamento->id,
+            'valor' => $request->valor,
+            'valor_empresa' => $request->valor,
+            'forma_pagamento' => $request->forma_pagamento,
+            'status' => 'pago',
+            'data_pagamento' => now(),
+            'observacoes' => 'Pagamento rápido'
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function concluir(Agendamento $agendamento)
     {
         $formasPagamento = FormaPagamento::where('ativo', true)->get();
