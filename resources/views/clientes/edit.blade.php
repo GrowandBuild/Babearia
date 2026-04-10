@@ -31,6 +31,18 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Instagram</label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                                @
+                            </span>
+                            <input type="text" name="instagram" value="{{ old('instagram', $cliente->instagram) }}" placeholder="nomeusuario"
+                                   class="flex-1 rounded-none rounded-r-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Opcional - Informe apenas o nome de usuário</p>
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700">Observações</label>
                         <textarea name="observacoes" rows="3"
                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('observacoes', $cliente->observacoes) }}</textarea>

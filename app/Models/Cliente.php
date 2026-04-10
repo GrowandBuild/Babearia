@@ -16,6 +16,7 @@ class Cliente extends Model
         'nome',
         'telefone',
         'email',
+        'instagram',
         'avatar',
         'observacoes',
     ];

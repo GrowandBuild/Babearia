@@ -28,6 +28,7 @@ class ClienteController extends Controller
             'nome' => 'required|string|max:255',
             'telefone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
+            'instagram' => 'nullable|string|max:50|regex:/^[a-zA-Z0-9._]+$/',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'observacoes' => 'nullable|string',
         ]);
@@ -63,6 +64,7 @@ class ClienteController extends Controller
             'nome' => 'required|string|max:255',
             'telefone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
+            'instagram' => 'nullable|string|max:50|regex:/^[a-zA-Z0-9._]+$/',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'observacoes' => 'nullable|string',
         ]);
