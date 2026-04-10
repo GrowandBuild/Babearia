@@ -78,4 +78,91 @@ class AdminAgendaController extends Controller
             'events' => $events,
         ]);
     }
+
+    // Finalizar atendimento
+    public function finalizarAtendimento(Request $request)
+    {
+        $request->validate([
+            'agendamento_id' => 'required|exists:agendamentos,id',
+            'servicos_adicionais' => 'nullable|array',
+            'servicos_adicionais.*' => 'exists:servicos,id',
+            'desconto' => 'nullable|numeric|min:0',
+            'forma_pagamento' => 'required|string|in:pix,dinheiro,debito,credito',
+            'observacoes_finalizacao' => 'nullable|string',
+        ]);
+
+        $agendamento = Agendamento::with(['servicos', 'cliente', 'pagamentos'])->findOrFail($request->agendamento_id);
+
+        // Verificar se já foi finalizado
+        if ($agendamento->status === 'concluido') {
+            return response()->json(['error' => 'Atendimento já foi finalizado'], 400);
+        }
+
+        // Calcular valor total
+        $valorTotal = 0;
+        $valorServicosOriginais = 0;
+
+        // Valor dos serviços originais
+        foreach ($agendamento->servicos as $servico) {
+            $valorServicosOriginais += $servico->preco_cobrado ?? 0;
+        }
+
+        // Verificar se é cliente com pacote
+        $isPacote = false;
+        if ($agendamento->cliente && $agendamento->cliente->isPackageValid()) {
+            $isPacote = true;
+            $valorServicosOriginais = 0; // Pacote já foi pago
+        }
+
+        // Adicionar serviços extras
+        $valorExtras = 0;
+        if ($request->servicos_adicionais) {
+            foreach ($request->servicos_adicionais as $servicoId) {
+                $servico = \App\Models\Servico::find($servicoId);
+                if ($servico) {
+                    $valorExtras += $servico->preco;
+                    // Vincular serviço extra ao agendamento
+                    $agendamento->servicos()->attach($servicoId, [
+                        'preco_cobrado' => $servico->preco
+                    ]);
+                }
+            }
+        }
+
+        $valorTotal = $valorServicosOriginais + $valorExtras;
+        
+        // Aplicar desconto
+        $desconto = $request->desconto ?? 0;
+        $valorFinal = max(0, $valorTotal - $desconto);
+
+        // Atualizar status do agendamento
+        $agendamento->status = 'concluido';
+        $agendamento->observacoes_finalizacao = $request->observacoes_finalizacao;
+        $agendamento->save();
+
+        // Se for pacote, usar um serviço do pacote
+        if ($isPacote && $agendamento->cliente) {
+            $agendamento->cliente->usePackageService();
+        }
+
+        // Criar registro de pagamento
+        if ($valorFinal > 0) {
+            $pagamento = \App\Models\Pagamento::create([
+                'agendamento_id' => $agendamento->id,
+                'valor' => $valorFinal,
+                'valor_empresa' => $valorFinal, // Para simplificar, 100% para empresa
+                'forma_pagamento' => $request->forma_pagamento,
+                'status' => 'pago',
+                'data_pagamento' => now(),
+                'observacoes' => 'Pagamento registrado na finalização do atendimento'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Atendimento finalizado com sucesso',
+            'valor_final' => $valorFinal,
+            'foi_pacote' => $isPacote
+        ]);
+    }
 }
