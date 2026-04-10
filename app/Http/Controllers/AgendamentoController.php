@@ -530,7 +530,7 @@ class AgendamentoController extends Controller
     {
         $request->validate([
             'profissional_id' => 'required|exists:profissionais,id',
-            'servico_id' => 'required|exists:servicos,id',
+            'servico_id' => 'required|string',
             'data' => 'required|date',
             'from' => 'nullable',
             'to' => 'nullable',
@@ -544,8 +544,20 @@ class AgendamentoController extends Controller
         $to = $request->input('to', '17:30');
         $step = $request->input('step', 30);
 
-        $servico = Servico::find($servicoId);
-        $duracao = $servico->duracao_minutos ?? 30;
+        // Verificar se é serviço de pacote
+        $isPacote = str_starts_with($servicoId, 'pacote_');
+        
+        if ($isPacote) {
+            // Para pacotes, usar duração padrão de 30 minutos
+            $duracao = 30;
+        } else {
+            // Para serviços normais, buscar do banco
+            $servico = Servico::find($servicoId);
+            if (!$servico) {
+                return response()->json(['error' => 'Serviço não encontrado'], 404);
+            }
+            $duracao = $servico->duracao_minutos ?? 30;
+        }
 
         // Verificar se o usuário quer mostrar agenda comprometida
         // TEMPORÁRIO: Sempre buscar agendamentos existentes
