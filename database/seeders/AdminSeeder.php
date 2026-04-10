@@ -33,6 +33,17 @@ class AdminSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        // Apenas dona e desenvolvedor são criados neste seeder conforme solicitado.
+
+        // Conta do Pedrinho (Funcionário)
+        User::updateOrCreate(
+            ['email' => 'pedrinho@barbearia.com.br'],
+            [
+                'name' => 'Pedrinho',
+                'email' => 'pedrinho@barbearia.com.br',
+                'password' => Hash::make('pedrinho123'),
+                'tipo' => 'profissional',
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

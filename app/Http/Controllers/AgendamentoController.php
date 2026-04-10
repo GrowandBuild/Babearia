@@ -603,14 +603,21 @@ class AgendamentoController extends Controller
 
     public function storeAutoAgendamento(Request $request)
     {
-        $validated = $request->validate([
+        // Regras de validação diferentes para usuários logados vs não logados
+        $rules = [
             'profissional_id' => 'required|integer|exists:profissionais,id',
             'servico_id' => 'required|integer|exists:servicos,id',
             'data' => 'required|date',
             'hora' => 'required',
-            'cliente_avulso' => 'required|string|max:255',
             'observacoes' => 'nullable|string',
-        ]);
+        ];
+
+        // Se não estiver logado, exigir nome do cliente
+        if (!auth()->check()) {
+            $rules['cliente_avulso'] = 'required|string|max:255';
+        }
+
+        $validated = $request->validate($rules);
 
         // Verificar se horário está disponível
         $horarioDisponivel = $this->verificarHorarioDisponivel(
@@ -627,8 +634,17 @@ class AgendamentoController extends Controller
             ])->withInput();
         }
 
-        // Converter string vazia para null no cliente_id
-        $request->merge(['cliente_id' => null]);
+        // Se usuário estiver logado, buscar seu cliente_id
+        if (auth()->check()) {
+            $user = auth()->user();
+            if ($user->cliente) {
+                $validated['cliente_id'] = $user->cliente->id;
+                $validated['cliente_avulso'] = null;
+            }
+        } else {
+            // Para usuários não logados, garantir que cliente_id seja null
+            $validated['cliente_id'] = null;
+        }
 
         // Combinar data e hora
         $validated['data_hora'] = $validated['data'] . ' ' . $validated['hora'];
