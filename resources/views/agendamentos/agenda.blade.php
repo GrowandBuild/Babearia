@@ -258,34 +258,15 @@
                                                     <div class="text-xs font-medium">{{ $agendamentoPrincipal->data_hora->format('H:i') }}</div>
                                                     <div class="text-xs opacity-75">{{ $duracao }}min</div>
                                                 </div>
-                                                <!-- Botões de Ação -->
-                                                <div class="flex gap-1 mt-2">
-                                                    <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.edit', $agendamentoPrincipal) }}'" 
-                                                            class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                            style="background: rgba(255,255,255,0.1); hover:background: rgba(255,255,255,0.2);"
-                                                            title="Editar">
-                                                        ✏️
+                                                <!-- BOTÕES SIMPLES E DIRETOS -->
+                                                <div style="margin-top: 8px; display: flex; gap: 4px;">
+                                                    <button onclick="window.location.href='{{ route('agendamentos.mostrar-finalizar', $agendamentoPrincipal) }}'" 
+                                                            style="background: #10b981; color: white; border: none; padding: 6px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">
+                                                        FINALIZAR
                                                     </button>
-                                                    
-                                                    <!-- BOTÃO FINALIZAR - PÁGINA COMPLETA -->
-                                                        <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.mostrar-finalizar', $agendamentoPrincipal) }}'" 
-                                                                class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                                style="background: #10b981; color: white; hover:background: #059669;"
-                                                                title="Finalizar Atendimento Completo">
-                                                            <span class="font-bold">FINALIZAR</span>
-                                                        </button>
-                                                        <button onclick="event.stopPropagation(); if(confirm('Deseja cancelar este agendamento?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
-                                                                class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                                style="background: #ef4444; color: white; hover:background: #dc2626;"
-                                                                title="Cancelar Agendamento">
-                                                            <span class="font-bold">CANCELAR</span>
-                                                        </button>
-                                                    
-                                                    <button onclick="removerAgendamento({{ $agendamentoPrincipal->id }}, event)" 
-                                                            class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                            style="background: rgba(239,68,68,0.3); hover:background: rgba(239,68,68,0.4);"
-                                                            title="Remover Permanentemente">
-                                                        🗑️
+                                                    <button onclick="if(confirm('Cancelar?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
+                                                            style="background: #ef4444; color: white; border: none; padding: 6px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">
+                                                        CANCELAR
                                                     </button>
                                                 </div>
                                             </div>
