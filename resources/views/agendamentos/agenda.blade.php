@@ -347,6 +347,75 @@
 </style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tornar agendamentos clicáveis para admin/proprietária
+    @if(auth()->user()->isProprietaria() || auth()->user()->isAdmin())
+    const user = auth()->user();
+    if ($user->isProprietaria() || $user->isAdmin()) {
+        // Adicionar clique nos cards de agendamento
+        document.querySelectorAll('td.relative').forEach(function(cell) {
+            const agendamentoDiv = cell.querySelector('div.absolute');
+            if (!agendamentoDiv) return;
+            
+            // Extrair ID do agendamento do conteúdo
+            const content = agendamentoDiv.textContent || agendamentoDiv.innerText;
+            const agendamentoMatch = content.match(/ID:\s*(\d+)/);
+            const agendamentoId = agendamentoMatch ? agendamentoMatch[1] : null;
+            
+            if (!agendamentoId) return;
+            
+            // Verificar status pela cor do elemento
+            const status = agendamentoDiv.style.background.includes('green') ? 'concluido' : 
+                          agendamentoDiv.style.background.includes('orange') ? 'pre_concluido' : 'agendado';
+            
+            // Só permitir clique se não estiver concluído
+            if (status !== 'concluido' && status !== 'cancelado') {
+                agendamentoDiv.style.cursor = 'pointer';
+                agendamentoDiv.style.border = '2px solid #10b981';
+                agendamentoDiv.style.transition = 'all 0.2s ease';
+                
+                // Adicionar indicador visual
+                const indicator = document.createElement('div');
+                indicator.innerHTML = 'FINALIZAR';
+                indicator.style.cssText = `
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    background: #10b981;
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 11px;
+                    font-weight: bold;
+                    z-index: 10;
+                `;
+                agendamentoDiv.style.position = 'relative';
+                agendamentoDiv.appendChild(indicator);
+                
+                // Eventos de hover
+                agendamentoDiv.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.02)';
+                    this.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                });
+                
+                agendamentoDiv.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = '';
+                });
+                
+                // Evento de clique
+                agendamentoDiv.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Clicando para finalizar agendamento:', agendamentoId);
+                    window.location.href = '/agendamentos/' + agendamentoId + '/finalizar';
+                });
+            }
+        });
+    }
+    @endif
+});
+
 function removerAgendamento(id, event) {
     event.stopPropagation();
     if(confirm('Tem certeza que deseja remover permanentemente este agendamento?')) {

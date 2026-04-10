@@ -227,8 +227,30 @@ class AgendamentoController extends Controller
             DB::rollBack();
             
             return redirect()->route('agendamentos.agenda')
-                ->with('error', 'Erro ao deletar agendamento: ' . $e->getMessage());
+                ->with('error', 'Erro ao remover agendamento: ' . $e->getMessage());
         }
+    }
+
+    // Mostrar página de finalização
+    public function mostrarFinalizar(Agendamento $agendamento)
+    {
+        // Carregar dados completos
+        $agendamento->load(['servicos', 'cliente', 'profissional']);
+        
+        // Verificar se já foi finalizado
+        if ($agendamento->status === 'concluido') {
+            return redirect()->route('agendamentos.agenda')
+                ->with('info', 'Este atendimento já foi finalizado');
+        }
+        
+        // Verificar permissões (só admin ou proprietária podem finalizar)
+        $user = auth()->user();
+        if (!$user->isProprietaria() && !$user->isAdmin()) {
+            return redirect()->route('agendamentos.agenda')
+                ->with('error', 'Você não tem permissão para finalizar atendimentos');
+        }
+        
+        return view('admin.finalizar-agendamento', compact('agendamento'));
     }
 
     public function concluir(Agendamento $agendamento)

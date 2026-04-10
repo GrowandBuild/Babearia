@@ -135,31 +135,47 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Debug para verificar o status
             console.log('Agendamento ID:', info.event.id, 'Status:', info.event.extendedProps.status);
+            console.log('Elemento HTML:', info.el);
+            console.log('Classes do elemento:', info.el.className);
             
-            // Fazer o evento inteiro ser clicável
+            // Adicionar estilo de clique
             info.el.style.cursor = 'pointer';
-            info.el.onclick = function(e) {
+            info.el.style.border = '2px solid #10b981';
+            info.el.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            
+            // Adicionar evento de clique de múltiplas formas
+            function handleClick(e) {
+                e.preventDefault();
                 e.stopPropagation();
-                console.log('Clicando no agendamento:', info.event.id);
+                console.log('CLIQUE DETECTADO! Agendamento ID:', info.event.id);
+                alert('Clicou no agendamento ID: ' + info.event.id);
                 // Redirecionar para página de finalização
                 window.location.href = '/admin/agenda/finalizar/' + info.event.id;
-            };
+            }
             
-            // Adicionar indicador visual de clique
-            info.el.style.border = '2px solid transparent';
-            info.el.style.transition = 'all 0.2s ease';
+            // Adicionar evento clique
+            info.el.addEventListener('click', handleClick);
+            info.el.onclick = handleClick;
             
-            info.el.addEventListener('mouseenter', function() {
-                this.style.border = '2px solid #10b981';
-                this.style.transform = 'scale(1.02)';
-            });
+            // Adicionar texto indicador
+            const indicator = document.createElement('div');
+            indicator.innerHTML = 'CLIQUE AQUI';
+            indicator.style.cssText = `
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                background: #10b981;
+                color: white;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-size: 10px;
+                font-weight: bold;
+                z-index: 1000;
+            `;
+            info.el.style.position = 'relative';
+            info.el.appendChild(indicator);
             
-            info.el.addEventListener('mouseleave', function() {
-                this.style.border = '2px solid transparent';
-                this.style.transform = 'scale(1)';
-            });
-            
-            console.log('Evento configurado como clicável!');
+            console.log('Evento configurado com clique e indicador visual!');
         }
     });
 

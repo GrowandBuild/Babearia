@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('agendamentos', AgendamentoController::class)->except(['destroy']);
     Route::get('/agendamentos/{agendamento}/concluir', [AgendamentoController::class, 'concluir'])->name('agendamentos.concluir');
     Route::post('/agendamentos/{agendamento}/finalizar', [AgendamentoController::class, 'finalizarPagamento'])->name('agendamentos.finalizar');
+    Route::get('/agendamentos/{agendamento}/finalizar', [AgendamentoController::class, 'mostrarFinalizar'])->name('agendamentos.mostrar-finalizar');
     Route::post('/agendamentos/{agendamento}/confirmar', [AgendamentoController::class, 'confirmarConclusao'])->name('agendamentos.confirmar')->middleware(['can:isProprietaria', 'financial.security']);
     Route::post('/agendamentos/{agendamento}/cancelar', [AgendamentoController::class, 'cancelar'])->name('agendamentos.cancelar');
     Route::delete('/agendamentos/{agendamento}/deletar', [AgendamentoController::class, 'deletarCompletamente'])->name('agendamentos.deletar')->middleware(['can:isProprietaria', 'financial.security']);
