@@ -268,11 +268,17 @@
                                                     </button>
                                                     
                                                     @if($agendamentoPrincipal->status == 'agendado')
-                                                        <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.concluir', $agendamentoPrincipal) }}'" 
+                                                        <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.faturar', $agendamentoPrincipal) }}'" 
                                                                 class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                                style="background: rgba(34,197,94,0.2); hover:background: rgba(34,197,94,0.3);"
-                                                                title="Concluir Atendimento">
-                                                            ✅
+                                                                style="background: rgba(16,185,129,0.2); hover:background: rgba(16,185,129,0.3);"
+                                                                title="Finalizar e Faturar">
+                                                            <span class="opacity-90">Finalizar</span>
+                                                        </button>
+                                                        <button onclick="event.stopPropagation(); if(confirm('Deseja cancelar este agendamento?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
+                                                                class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
+                                                                style="background: rgba(239, 68, 68,0.2); hover:background: rgba(239, 68, 68,0.3);"
+                                                                title="Cancelar Agendamento">
+                                                            <span class="opacity-90">Cancelar</span>
                                                         </button>
                                                     @endif
                                                     
