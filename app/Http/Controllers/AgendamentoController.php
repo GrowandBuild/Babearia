@@ -388,7 +388,7 @@ class AgendamentoController extends Controller
     {
         $request->validate([
             'profissional_id' => 'required|exists:profissionais,id',
-            'servico_id' => 'required|exists:servicos,id',
+            'servico_id' => 'required|string',
             'data' => 'required|date',
             'hora_desejada' => 'required',
         ]);
@@ -398,8 +398,20 @@ class AgendamentoController extends Controller
         $data = $request->data;
         $horaDesejada = $request->hora_desejada;
 
-        $servico = Servico::find($servicoId);
-        $duracao = $servico->duracao_minutos ?? 30;
+        // Verificar se é serviço de pacote
+        $isPacote = str_starts_with($servicoId, 'pacote_');
+        
+        if ($isPacote) {
+            // Para pacotes, usar duração padrão de 30 minutos
+            $duracao = 30;
+        } else {
+            // Para serviços normais, buscar do banco
+            $servico = Servico::find($servicoId);
+            if (!$servico) {
+                return response()->json(['error' => 'Serviço não encontrado'], 404);
+            }
+            $duracao = $servico->duracao_minutos ?? 30;
+        }
 
         // Buscar agendamentos do profissional na data
         $agendamentos = Agendamento::where('profissional_id', $profissionalId)
@@ -639,7 +651,7 @@ class AgendamentoController extends Controller
         // Regras de validação diferentes para usuários logados vs não logados
         $rules = [
             'profissional_id' => 'required|integer|exists:profissionais,id',
-            'servico_id' => 'required|integer|exists:servicos,id',
+            'servico_id' => 'required|string',
             'data' => 'required|date',
             'hora' => 'required',
             'observacoes' => 'nullable|string',
@@ -652,12 +664,26 @@ class AgendamentoController extends Controller
 
         $validated = $request->validate($rules);
 
+        // Verificar se é serviço de pacote
+        $isPacote = str_starts_with($validated['servico_id'], 'pacote_');
+        
+        if ($isPacote) {
+            // Para pacotes, usar um serviço existente como base (primeiro serviço ativo)
+            $servicoBase = Servico::where('ativo', true)->first();
+            if (!$servicoBase) {
+                return back()->withErrors(['servico' => 'Nenhum serviço disponível no sistema'])->withInput();
+            }
+            $servicoIdParaVerificar = $servicoBase->id;
+        } else {
+            $servicoIdParaVerificar = $validated['servico_id'];
+        }
+
         // Verificar se horário está disponível
         $horarioDisponivel = $this->verificarHorarioDisponivel(
             $validated['profissional_id'],
             $validated['data'],
             $validated['hora'],
-            $validated['servico_id']
+            $servicoIdParaVerificar
         );
 
         if (!$horarioDisponivel['disponivel']) {
@@ -689,10 +715,28 @@ class AgendamentoController extends Controller
         // Criar agendamento
         $agendamento = Agendamento::create($validated);
         
+        // Lidar com serviço de pacote
+        if ($isPacote) {
+            // Para pacotes, usar o primeiro serviço ativo
+            $servicoBase = Servico::where('ativo', true)->first();
+            $precoCobrado = 0; // Pacote é grátis
+            
+            // Usar um serviço do pacote
+            if (auth()->check() && auth()->user()->cliente) {
+                $cliente = auth()->user()->cliente;
+                if ($cliente->usePackageService()) {
+                    // Serviço do pacote utilizado com sucesso
+                }
+            }
+        } else {
+            // Para serviços normais
+            $servicoBase = Servico::find($servicoId);
+            $precoCobrado = $servicoBase->preco ?? 0;
+        }
+        
         // Vincular serviço na tabela pivot
-        $servico = Servico::find($servicoId);
-        $agendamento->servicos()->attach($servicoId, [
-            'preco_cobrado' => $servico->preco
+        $agendamento->servicos()->attach($servicoBase->id, [
+            'preco_cobrado' => $precoCobrado
         ]);
 
         return redirect()->route('agendamentos.agenda')
