@@ -276,18 +276,18 @@
                                                         ✏️
                                                     </button>
                                                     
-                                                    <!-- Botões sempre visíveis para teste -->
-                                                        <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.faturar', $agendamentoPrincipal) }}'" 
+                                                    <!-- BOTÕES SEMPRE VISÍVEIS -->
+                                                        <button onclick="event.stopPropagation(); alert('Finalizar clicado! ID: {{ $agendamentoPrincipal->id }}')" 
                                                                 class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                                style="background: rgba(16,185,129,0.5); hover:background: rgba(16,185,129,0.7);"
+                                                                style="background: #10b981; color: white; hover:background: #059669;"
                                                                 title="Finalizar e Faturar">
-                                                            <span class="opacity-90">Finalizar</span>
+                                                            <span class="font-bold">FINALIZAR</span>
                                                         </button>
-                                                        <button onclick="event.stopPropagation(); if(confirm('Deseja cancelar este agendamento?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
+                                                        <button onclick="event.stopPropagation(); alert('Cancelar clicado! ID: {{ $agendamentoPrincipal->id }}')" 
                                                                 class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
-                                                                style="background: rgba(239, 68, 68,0.5); hover:background: rgba(239, 68, 68,0.7);"
+                                                                style="background: #ef4444; color: white; hover:background: #dc2626;"
                                                                 title="Cancelar Agendamento">
-                                                            <span class="opacity-90">Cancelar</span>
+                                                            <span class="font-bold">CANCELAR</span>
                                                         </button>
                                                     
                                                     <button onclick="removerAgendamento({{ $agendamentoPrincipal->id }}, event)" 
