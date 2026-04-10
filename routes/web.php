@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function () {
         // Dashboard de Agenda (admin) - visão tipo "colunas por profissional"
         Route::get('/admin/agenda', [App\Http\Controllers\AdminAgendaController::class, 'index'])->name('admin.agenda');
         Route::get('/admin/agenda/events', [App\Http\Controllers\AdminAgendaController::class, 'events'])->name('admin.agenda.events');
+        Route::get('/admin/agenda/finalizar/{id}', [App\Http\Controllers\AdminAgendaController::class, 'mostrarFinalizar'])->name('admin.agenda.mostrar-finalizar');
         Route::post('/admin/agenda/finalizar-atendimento', [App\Http\Controllers\AdminAgendaController::class, 'finalizarAtendimento'])->name('admin.agenda.finalizar');
         
         Route::get('/formas-pagamento', [FormaPagamentoController::class, 'index'])->name('formas-pagamento.index');

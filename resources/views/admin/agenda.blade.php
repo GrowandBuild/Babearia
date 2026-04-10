@@ -135,32 +135,31 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Debug para verificar o status
             console.log('Agendamento ID:', info.event.id, 'Status:', info.event.extendedProps.status);
-            console.log('Elemento do evento:', info.el);
             
-            // Adicionar botão de finalização para TODOS os eventos (temporariamente para teste)
-            const finalizarBtn = document.createElement('button');
-            finalizarBtn.innerHTML = 'Finalizar';
-            finalizarBtn.style.cssText = `
-                margin-left: 8px;
-                padding: 2px 6px;
-                background: #10b981;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-size: 11px;
-                cursor: pointer;
-                font-weight: bold;
-            `;
-            finalizarBtn.onclick = function(e) {
+            // Fazer o evento inteiro ser clicável
+            info.el.style.cursor = 'pointer';
+            info.el.onclick = function(e) {
                 e.stopPropagation();
-                console.log('Botão clicado para agendamento:', info.event.id);
-                abrirModalFinalizar(info.event.id);
+                console.log('Clicando no agendamento:', info.event.id);
+                // Redirecionar para página de finalização
+                window.location.href = '/admin/agenda/finalizar/' + info.event.id;
             };
             
-            // Adicionar o botão no final do elemento do evento
-            info.el.appendChild(finalizarBtn);
+            // Adicionar indicador visual de clique
+            info.el.style.border = '2px solid transparent';
+            info.el.style.transition = 'all 0.2s ease';
             
-            console.log('Botão adicionado com sucesso!');
+            info.el.addEventListener('mouseenter', function() {
+                this.style.border = '2px solid #10b981';
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            info.el.addEventListener('mouseleave', function() {
+                this.style.border = '2px solid transparent';
+                this.style.transform = 'scale(1)';
+            });
+            
+            console.log('Evento configurado como clicável!');
         }
     });
 

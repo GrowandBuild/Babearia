@@ -165,4 +165,18 @@ class AdminAgendaController extends Controller
             'foi_pacote' => $isPacote
         ]);
     }
+
+    // Mostrar página de finalização
+    public function mostrarFinalizar($id)
+    {
+        $agendamento = Agendamento::with(['servicos', 'cliente', 'profissional'])->findOrFail($id);
+        
+        // Verificar se já foi finalizado
+        if ($agendamento->status === 'concluido') {
+            return redirect()->route('admin.agenda')
+                ->with('info', 'Este atendimento já foi finalizado');
+        }
+        
+        return view('admin.finalizar-agendamento', compact('agendamento'));
+    }
 }
