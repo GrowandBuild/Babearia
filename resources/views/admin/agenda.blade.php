@@ -135,29 +135,32 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Debug para verificar o status
             console.log('Agendamento ID:', info.event.id, 'Status:', info.event.extendedProps.status);
+            console.log('Elemento do evento:', info.el);
             
-            // Adicionar botão de finalização se não estiver concluído
-            if (info.event.extendedProps.status !== 'concluido' && info.event.extendedProps.status !== 'cancelado') {
-                console.log('Adicionando botão Finalizar para:', info.event.title);
-                const finalizarBtn = document.createElement('button');
-                finalizarBtn.innerHTML = 'Finalizar';
-                finalizarBtn.className = 'ml-2 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 cursor-pointer';
-                finalizarBtn.style.marginLeft = '8px';
-                finalizarBtn.style.fontSize = '11px';
-                finalizarBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    abrirModalFinalizar(info.event.id);
-                };
-                
-                // Tentar encontrar o título e adicionar o botão
-                const titleElement = info.el.querySelector('.fc-event-title');
-                if (titleElement) {
-                    titleElement.appendChild(finalizarBtn);
-                } else {
-                    // Se não encontrar o título, adicionar diretamente no evento
-                    info.el.appendChild(finalizarBtn);
-                }
-            }
+            // Adicionar botão de finalização para TODOS os eventos (temporariamente para teste)
+            const finalizarBtn = document.createElement('button');
+            finalizarBtn.innerHTML = 'Finalizar';
+            finalizarBtn.style.cssText = `
+                margin-left: 8px;
+                padding: 2px 6px;
+                background: #10b981;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 11px;
+                cursor: pointer;
+                font-weight: bold;
+            `;
+            finalizarBtn.onclick = function(e) {
+                e.stopPropagation();
+                console.log('Botão clicado para agendamento:', info.event.id);
+                abrirModalFinalizar(info.event.id);
+            };
+            
+            // Adicionar o botão no final do elemento do evento
+            info.el.appendChild(finalizarBtn);
+            
+            console.log('Botão adicionado com sucesso!');
         }
     });
 
