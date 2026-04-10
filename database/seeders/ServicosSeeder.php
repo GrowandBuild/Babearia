@@ -16,9 +16,9 @@ class ServicosSeeder extends Seeder
             ['nome' => 'Degrade'],
             [
                 'nome' => 'Degrade',
-                'descricao' => '',
+                'descricao' => 'Corte de cabelo degrade tradicional',
                 'preco' => 28.00,
-                'duracao' => ,
+                'duracao_minutos' => 25,
                 'ativo' => true,
             ]
         );
