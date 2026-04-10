@@ -348,10 +348,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Tornar agendamentos clicáveis para admin/proprietária
-    @if(auth()->user()->isProprietaria() || auth()->user()->isAdmin())
+    console.log('JavaScript carregado na agenda!');
+    
+    // Tornar agendamentos clicáveis para todos (temporário para teste)
+    // @if(auth()->user()->isProprietaria() || auth()->user()->isAdmin())
     const user = auth()->user();
-    if ($user->isProprietaria() || $user->isAdmin()) {
+    if (true) { // Forçar para todos testarem
         // Adicionar botões simples nos agendamentos
         document.querySelectorAll('td.relative').forEach(function(cell) {
             const agendamentoDiv = cell.querySelector('div.absolute');
@@ -363,6 +365,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const agendamentoId = agendamentoMatch ? agendamentoMatch[1] : null;
             
             if (!agendamentoId) return;
+            
+            console.log('Encontrado agendamento ID:', agendamentoId);
+            
+            // Adicionar botão de teste visível
+            const testBtn = document.createElement('button');
+            testBtn.innerHTML = 'TESTE';
+            testBtn.style.cssText = `
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                background: red;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: bold;
+                z-index: 100;
+            `;
+            testBtn.onclick = function() {
+                alert('Botão teste clicado! Agendamento ID: ' + agendamentoId);
+            };
+            agendamentoDiv.appendChild(testBtn);
             
             // Verificar status pela cor do elemento
             const status = agendamentoDiv.style.background.includes('green') ? 'concluido' : 
