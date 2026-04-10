@@ -267,11 +267,11 @@
                                                         ✏️
                                                     </button>
                                                     
-                                                    <!-- BOTÕES FINALIZAR E CANCELAR -->
-                                                        <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.faturar', $agendamentoPrincipal) }}'" 
+                                                    <!-- BOTÃO FINALIZAR - PÁGINA COMPLETA -->
+                                                        <button onclick="event.stopPropagation(); window.location.href='{{ route('agendamentos.mostrar-finalizar', $agendamentoPrincipal) }}'" 
                                                                 class="flex-1 text-xs px-2 py-1 rounded transition-colors" 
                                                                 style="background: #10b981; color: white; hover:background: #059669;"
-                                                                title="Finalizar e Faturar">
+                                                                title="Finalizar Atendimento Completo">
                                                             <span class="font-bold">FINALIZAR</span>
                                                         </button>
                                                         <button onclick="event.stopPropagation(); if(confirm('Deseja cancelar este agendamento?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
