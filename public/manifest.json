@@ -1,7 +1,7 @@
 {
-  "name": "Vida Maria Esmalteria",
-  "short_name": "Vida Maria",
-  "description": "Sistema completo de agendamentos e gestão financeira para Esmalteria Vida Maria",
+  "name": "Barbearia",
+  "short_name": "Barbearia",
+  "description": "Sistema completo de agendamentos e gestão para barbearia",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0A1647",
