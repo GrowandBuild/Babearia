@@ -25,6 +25,19 @@ class Servico extends Model
         'ativo' => 'boolean',
     ];
 
+    public function getImagemUrlAttribute($value)
+    {
+        if (! $value) {
+            return null;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($value);
+    }
+
     // Relacionamentos
     public function agendamentos()
     {

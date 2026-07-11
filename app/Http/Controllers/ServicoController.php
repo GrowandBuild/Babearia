@@ -28,7 +28,7 @@ class ServicoController extends Controller
             'preco' => 'required|numeric|min:0',
             'duracao_minutos' => 'nullable|integer|min:0',
             'descricao' => 'nullable|string',
-            'imagem_url' => 'nullable|url',
+            'imagem_url' => 'nullable|string',
             'imagem_upload' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
@@ -36,8 +36,7 @@ class ServicoController extends Controller
         
         // Processar upload de imagem
         if ($request->hasFile('imagem_upload')) {
-            $path = $request->file('imagem_upload')->storePublicly('servicos', 'public');
-            $data['imagem_url'] = Storage::url($path);
+            $data['imagem_url'] = $request->file('imagem_upload')->storePublicly('servicos', 'public');
         }
         
         // Se não houver upload mas tiver URL, usar a URL
@@ -69,7 +68,7 @@ class ServicoController extends Controller
             'preco' => 'required|numeric|min:0',
             'duracao_minutos' => 'nullable|integer|min:0',
             'descricao' => 'nullable|string',
-            'imagem_url' => 'nullable|url',
+            'imagem_url' => 'nullable|string',
             'imagem_upload' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
@@ -77,8 +76,7 @@ class ServicoController extends Controller
         
         // Processar upload de imagem
         if ($request->hasFile('imagem_upload')) {
-            $path = $request->file('imagem_upload')->storePublicly('servicos', 'public');
-            $data['imagem_url'] = Storage::url($path);
+            $data['imagem_url'] = $request->file('imagem_upload')->storePublicly('servicos', 'public');
         }
         
         // Se não houver upload mas tiver URL, usar a URL
