@@ -38,7 +38,9 @@ class Servico extends Model
         $value = preg_replace('#^storage/#', '', $value);
         $value = preg_replace('#^public/#', '', $value);
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($value);
+        // Retornar caminho relativo para evitar problemas com host/porta (ex: :8000)
+        $value = ltrim($value, '/');
+        return '/storage/' . $value;
     }
 
     // Relacionamentos
