@@ -18,7 +18,7 @@ class ServicosSeeder extends Seeder
                 'nome' => 'Degrade',
                 'descricao' => 'Corte de cabelo degrade tradicional',
                 'preco' => 28.00,
-                'duracao' => ,
+                'duracao_minutos' => 30,
                 'ativo' => true,
             ]
         );
@@ -29,7 +29,7 @@ class ServicosSeeder extends Seeder
                 'nome' => 'sdsds',
                 'descricao' => 'dsds',
                 'preco' => 19.00,
-                'duracao' => ,
+                'duracao_minutos' => 30,
                 'ativo' => true,
             ]
         );
@@ -40,7 +40,7 @@ class ServicosSeeder extends Seeder
                 'nome' => 'dsds',
                 'descricao' => '',
                 'preco' => 14.98,
-                'duracao' => ,
+                'duracao_minutos' => 30,
                 'ativo' => true,
             ]
         );
