@@ -36,10 +36,8 @@ class ServicoController extends Controller
         
         // Processar upload de imagem
         if ($request->hasFile('imagem_upload')) {
-            $image = $request->file('imagem_upload');
-            $imageName = 'servicos/' . Str::uuid() . '.' . $image->getClientOriginalExtension();
-            $image->storePubliclyAs('servicos', $image->getClientOriginalName(), 'public');
-            $data['imagem_url'] = Storage::url($imageName);
+            $path = $request->file('imagem_upload')->storePublicly('servicos', 'public');
+            $data['imagem_url'] = Storage::url($path);
         }
         
         // Se não houver upload mas tiver URL, usar a URL
@@ -79,10 +77,8 @@ class ServicoController extends Controller
         
         // Processar upload de imagem
         if ($request->hasFile('imagem_upload')) {
-            $image = $request->file('imagem_upload');
-            $imageName = 'servicos/' . Str::uuid() . '.' . $image->getClientOriginalExtension();
-            $image->storePubliclyAs('servicos', $image->getClientOriginalName(), 'public');
-            $data['imagem_url'] = Storage::url($imageName);
+            $path = $request->file('imagem_upload')->storePublicly('servicos', 'public');
+            $data['imagem_url'] = Storage::url($path);
         }
         
         // Se não houver upload mas tiver URL, usar a URL
