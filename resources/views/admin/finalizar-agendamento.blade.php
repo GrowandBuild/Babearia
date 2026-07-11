@@ -56,7 +56,7 @@
                                         @endif
                                     </div>
                                     <div class="text-right">
-                                        <span class="font-semibold">R$ {{ number_format($servico->preco_cobrado ?? $servico->preco, 2, ',', '.') }}</span>
+                                        <span class="font-semibold service-price">R$ {{ number_format($servico->preco_cobrado ?? $servico->preco, 2, ',', '.') }}</span>
                                     </div>
                                 </div>
                             @endforeach

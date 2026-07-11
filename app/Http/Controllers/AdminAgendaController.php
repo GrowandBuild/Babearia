@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Profissional;
 use App\Models\Agendamento;
+use App\Models\FormaPagamento;
+use App\Models\Pagamento;
 
 class AdminAgendaController extends Controller
 {
@@ -69,6 +71,12 @@ class AdminAgendaController extends Controller
                 'extendedProps' => [
                     'status' => $a->status,
                     'observacoes' => $a->observacoes,
+                    'servicos' => $a->servicos->map(function ($s) {
+                        return [
+                            'nome' => $s->nome,
+                            'preco' => $s->preco_cobrado ?? $s->preco,
+                        ];
+                    })->toArray(),
                 ],
             ];
         })->values();
@@ -147,15 +155,21 @@ class AdminAgendaController extends Controller
 
         // Criar registro de pagamento
         if ($valorFinal > 0) {
-            $pagamento = \App\Models\Pagamento::create([
-                'agendamento_id' => $agendamento->id,
-                'valor' => $valorFinal,
-                'valor_empresa' => $valorFinal, // Para simplificar, 100% para empresa
-                'forma_pagamento' => $request->forma_pagamento,
-                'status' => 'pago',
-                'data_pagamento' => now(),
-                'observacoes' => 'Pagamento registrado na finalização do atendimento'
-            ]);
+            $formaPagamento = FormaPagamento::whereRaw('LOWER(nome) = ?', [strtolower($request->forma_pagamento)])->first();
+            if (! $formaPagamento) {
+                return response()->json(['error' => 'Forma de pagamento inválida'], 400);
+            }
+
+            $profissional = $agendamento->profissional;
+            $valoresPagamento = Pagamento::calcularValores($valorFinal, $formaPagamento, $profissional, 0);
+
+            $pagamento = Pagamento::create(array_merge(
+                [
+                    'agendamento_id' => $agendamento->id,
+                    'forma_pagamento_id' => $formaPagamento->id,
+                ],
+                $valoresPagamento
+            ));
         }
 
         return response()->json([

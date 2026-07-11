@@ -196,10 +196,7 @@ function abrirModalFinalizar(eventId) {
                 // Mostrar serviços
                 const servicos = event.extendedProps.servicos || [];
                 document.getElementById('servicos_info').innerHTML = servicos.length > 0 
-                    ? servicos.map(s => `${s.nome} - R$ ${s.preco}`).join('<br>') 
-                    : 'Nenhum serviço registrado';
-                
-                // Resetar campos
+                        ? servicos.map(s => `${s.nome} - R$ ${s.preco.toFixed(2).replace('.', ',')}`).join('<br>') 
                 document.getElementById('servicos_adicionais').selectedIndex = 0;
                 document.getElementById('desconto').value = '';
                 document.getElementById('forma_pagamento').selectedIndex = 0;
@@ -219,17 +216,33 @@ function fecharModal() {
     document.getElementById('modalFinalizar').classList.remove('flex');
 }
 
+function parseCurrency(value) {
+    return parseFloat(value.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
+}
+
 function calcularTotal() {
-    const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+    let total = 0;
+
+    // Valor dos serviços já agendados
+    const servicosInfo = document.getElementById('servicos_info').textContent || '';
+    servicosInfo.split(/\r?\n/).forEach(line => {
+        const matches = line.match(/R\$\s*([0-9.,]+)/);
+        if (matches) {
+            total += parseCurrency(matches[1]);
+        }
+    });
+
+    // Serviços adicionais
     const servicosAdicionais = Array.from(document.getElementById('servicos_adicionais').selectedOptions);
-    
-    let valorExtras = 0;
     servicosAdicionais.forEach(option => {
         const preco = parseFloat(option.text.split(' - R$ ')[1]) || 0;
-        valorExtras += preco;
+        total += preco;
     });
     
-    const valorFinal = Math.max(0, valorExtras - desconto);
+    // Desconto
+    const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+    
+    const valorFinal = Math.max(0, total - desconto);
     document.getElementById('valor_final').textContent = `R$ ${valorFinal.toFixed(2).replace('.', ',')}`;
 }
 
