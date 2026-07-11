@@ -195,15 +195,15 @@
                                 }
                             }
                             
-                            // Altura da linha: 25px se estiver vazia (mais compacta), 70px se tiver agendamento
-                            $alturaLinha = $temAgendamento ? 70 : 25;
+                            // Altura da linha: 25px se estiver vazia, 150px se tiver agendamento para suportar o card completo
+                            $alturaLinha = $temAgendamento ? 150 : 25;
                         @endphp
                         <tr class="transition-colors" style="border-bottom:1px solid var(--brand-border);">
                             <td class="sticky left-0 z-10 px-4 py-2 text-sm font-semibold border-r" style="border-right:1px solid var(--brand-border); color: var(--text-light); background: var(--brand-surface);">
                                 {{ $horario }}
                             </td>
                             @foreach($profissionaisParaExibir as $prof)
-                                <td class="px-2 py-1 border-r relative" style="height: {{ $alturaLinha }}px; border-right:1px solid var(--brand-border); background: transparent;">
+                                <td class="px-2 py-1 border-r relative" style="height: {{ $alturaLinha }}px; border-right:1px solid var(--brand-border); background: transparent; overflow: visible;">
                                     @php
                                         // Encontrar agendamento que começa neste horário
                                         $agendamentoPrincipal = collect($agendamentosPorProf[$prof->id] ?? [])
@@ -219,9 +219,8 @@
                                             // Calcular quantos slots de 30min o agendamento ocupa
                                             $slots = max(1, ceil($duracao / 30));
                                             
-                                            // Calcular altura: considerar que linhas vazias têm 25px e linhas com agendamento têm 70px
-                                            // Mas para simplificar, vamos usar 70px por slot quando há agendamento
-                                            $alturaTotal = ($slots * 70) - 4; // 70px por slot, menos 4px de margem
+                                            // Calcular altura: usar espaço extra para botões e texto dentro do card
+                                            $alturaTotal = max(1, $slots) * 120 - 4; // 120px por slot, menos 4px de margem
                                             $coresStatus = match($agendamentoPrincipal->status) {
                                                 'concluido' => [
                                                     'bg' => 'bg-green-600',
@@ -245,8 +244,8 @@
                                                 ]
                                             };
                                         @endphp
-                                        <div class="absolute top-1 left-1 right-1 rounded-lg shadow-sm p-2 overflow-hidden transition hover:scale-105" 
-                                             style="height: {{ $alturaTotal }}px; z-index: 5; background: var(--brand-secondary); color: var(--brand-on-secondary); border-left: 3px solid rgba(0,0,0,0.1);">
+                                        <div class="absolute top-1 left-1 right-1 rounded-lg shadow-sm p-2 transition hover:scale-105" 
+                                             style="height: {{ $alturaTotal }}px; z-index: 5; overflow: visible; background: var(--brand-secondary); color: var(--brand-on-secondary); border-left: 3px solid rgba(0,0,0,0.1);">
                                             <div class="flex flex-col h-full justify-between">
                                                 <div>
                                                     <div class="font-bold text-sm truncate">{{ $agendamentoPrincipal->nome_cliente }}</div>
@@ -258,17 +257,19 @@
                                                     <div class="text-xs font-medium">{{ $agendamentoPrincipal->data_hora->format('H:i') }}</div>
                                                     <div class="text-xs opacity-75">{{ $duracao }}min</div>
                                                 </div>
-                                                <!-- BOTÕES SIMPLES E DIRETOS -->
-                                                <div style="margin-top: 8px; display: flex; gap: 4px;">
-                                                    <button onclick="window.location.href='{{ route('agendamentos.mostrar-finalizar', $agendamentoPrincipal) }}'" 
-                                                            style="background: #10b981; color: white; border: none; padding: 6px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">
-                                                        FINALIZAR
-                                                    </button>
-                                                    <button onclick="if(confirm('Cancelar?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
-                                                            style="background: #ef4444; color: white; border: none; padding: 6px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">
-                                                        CANCELAR
-                                                    </button>
-                                                </div>
+                                                @if(!in_array($agendamentoPrincipal->status, ['concluido', 'cancelado']))
+                                                    <!-- BOTÕES DE FINALIZAÇÃO E CANCELAMENTO -->
+                                                    <div style="margin-top: auto; display: flex; gap: 4px; align-items: flex-end; padding-bottom: 4px;">
+                                                        <button onclick="window.location.href='{{ route('agendamentos.mostrar-finalizar', $agendamentoPrincipal) }}'" 
+                                                                style="flex: 1; background: #2563eb; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+                                                            FATURAR
+                                                        </button>
+                                                        <button onclick="if(confirm('Cancelar?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
+                                                                style="flex: 1; background: #ef4444; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+                                                            CANCELAR
+                                                        </button>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     @endif
@@ -335,113 +336,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('JavaScript carregado na agenda!');
-    
-    // Tornar agendamentos clicáveis para todos (temporário para teste)
-    // @if(auth()->user()->isProprietaria() || auth()->user()->isAdmin())
-    const user = auth()->user();
-    if (true) { // Forçar para todos testarem
-        // Adicionar botões simples nos agendamentos
-        document.querySelectorAll('td.relative').forEach(function(cell) {
-            const agendamentoDiv = cell.querySelector('div.absolute');
-            if (!agendamentoDiv) return;
-            
-            // Extrair ID do agendamento do conteúdo
-            const content = agendamentoDiv.textContent || agendamentoDiv.innerText;
-            const agendamentoMatch = content.match(/ID:\s*(\d+)/);
-            const agendamentoId = agendamentoMatch ? agendamentoMatch[1] : null;
-            
-            if (!agendamentoId) return;
-            
-            console.log('Encontrado agendamento ID:', agendamentoId);
-            
-            // Adicionar botão de teste visível
-            const testBtn = document.createElement('button');
-            testBtn.innerHTML = 'TESTE';
-            testBtn.style.cssText = `
-                position: absolute;
-                top: 2px;
-                left: 2px;
-                background: red;
-                color: white;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 10px;
-                font-weight: bold;
-                z-index: 100;
-            `;
-            testBtn.onclick = function() {
-                alert('Botão teste clicado! Agendamento ID: ' + agendamentoId);
-            };
-            agendamentoDiv.appendChild(testBtn);
-            
-            // Verificar status pela cor do elemento
-            const status = agendamentoDiv.style.background.includes('green') ? 'concluido' : 
-                          agendamentoDiv.style.background.includes('orange') ? 'pre_concluido' : 'agendado';
-            
-            // Criar container para botões
-            const buttonContainer = document.createElement('div');
-            buttonContainer.style.cssText = `
-                position: absolute;
-                bottom: 4px;
-                left: 4px;
-                right: 4px;
-                display: flex;
-                gap: 4px;
-                z-index: 20;
-            `;
-            
-            // Botão Finalizar
-            if (status !== 'concluido' && status !== 'cancelado') {
-                const btnFinalizar = document.createElement('button');
-                btnFinalizar.innerHTML = 'Finalizar';
-                btnFinalizar.style.cssText = `
-                    flex: 1;
-                    background: #10b981;
-                    color: white;
-                    border: none;
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                    font-size: 10px;
-                    font-weight: bold;
-                    cursor: pointer;
-                `;
-                btnFinalizar.onclick = function(e) {
-                    e.stopPropagation();
-                    window.location.href = '/agendamentos/' + agendamentoId + '/faturar';
-                };
-                buttonContainer.appendChild(btnFinalizar);
-            }
-            
-            // Botão Cancelar
-            if (status !== 'concluido' && status !== 'cancelado') {
-                const btnCancelar = document.createElement('button');
-                btnCancelar.innerHTML = 'Cancelar';
-                btnCancelar.style.cssText = `
-                    flex: 1;
-                    background: #ef4444;
-                    color: white;
-                    border: none;
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                    font-size: 10px;
-                    font-weight: bold;
-                    cursor: pointer;
-                `;
-                btnCancelar.onclick = function(e) {
-                    e.stopPropagation();
-                    if (confirm('Deseja cancelar este agendamento?')) {
-                        window.location.href = '/agendamentos/' + agendamentoId + '/cancelar';
-                    }
-                };
-                buttonContainer.appendChild(btnCancelar);
-            }
-            
-            // Adicionar botões ao agendamento
-            agendamentoDiv.style.position = 'relative';
-            agendamentoDiv.appendChild(buttonContainer);
-        });
-    }
-    @endif
 });
 
 function removerAgendamento(id, event) {
