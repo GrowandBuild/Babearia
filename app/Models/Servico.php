@@ -35,6 +35,9 @@ class Servico extends Model
             return $value;
         }
 
+        $value = preg_replace('#^storage/#', '', $value);
+        $value = preg_replace('#^public/#', '', $value);
+
         return \Illuminate\Support\Facades\Storage::disk('public')->url($value);
     }
 
