@@ -9,8 +9,8 @@ class ServicosSeeder extends Seeder
 {
     public function run()
     {
-        // Serviços sincronizados automaticamente em 10/04/2026 13:16:53
-        // Total de serviços: 1
+        // Serviços sincronizados automaticamente em 11/07/2026 14:51:33
+        // Total de serviços: 3
 
         Servico::updateOrCreate(
             ['nome' => 'Degrade'],
@@ -18,7 +18,29 @@ class ServicosSeeder extends Seeder
                 'nome' => 'Degrade',
                 'descricao' => 'Corte de cabelo degrade tradicional',
                 'preco' => 28.00,
-                'duracao_minutos' => 25,
+                'duracao' => ,
+                'ativo' => true,
+            ]
+        );
+
+        Servico::updateOrCreate(
+            ['nome' => 'sdsds'],
+            [
+                'nome' => 'sdsds',
+                'descricao' => 'dsds',
+                'preco' => 19.00,
+                'duracao' => ,
+                'ativo' => true,
+            ]
+        );
+
+        Servico::updateOrCreate(
+            ['nome' => 'dsds'],
+            [
+                'nome' => 'dsds',
+                'descricao' => '',
+                'preco' => 14.98,
+                'duracao' => ,
                 'ativo' => true,
             ]
         );
