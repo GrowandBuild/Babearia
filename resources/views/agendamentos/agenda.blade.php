@@ -264,10 +264,13 @@
                                                                 style="flex: 1; background: #2563eb; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
                                                             FATURAR
                                                         </button>
-                                                        <button onclick="if(confirm('Cancelar?')) { window.location.href='{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}'; }" 
-                                                                style="flex: 1; background: #ef4444; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
-                                                            CANCELAR
-                                                        </button>
+                                                        <form action="{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}" method="POST" onsubmit="return confirm('Cancelar?')" style="flex: 1; margin: 0;">
+                                                            @csrf
+                                                            <button type="submit" 
+                                                                    style="width: 100%; background: #ef4444; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+                                                                CANCELAR
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 @endif
                                             </div>
