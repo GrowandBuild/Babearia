@@ -30,5 +30,5 @@ return new class extends Migration
             $table->dropColumn(['mostrar_titulo', 'mostrar_descricao']);
         });
     }
-    }
+    
 };
