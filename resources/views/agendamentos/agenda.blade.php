@@ -257,13 +257,41 @@
                                                     <div class="text-xs font-medium">{{ $agendamentoPrincipal->data_hora->format('H:i') }}</div>
                                                     <div class="text-xs opacity-75">{{ $duracao }}min</div>
                                                 </div>
-                                                @if(!in_array($agendamentoPrincipal->status, ['concluido', 'cancelado']))
-                                                    <!-- BOTÕES DE FINALIZAÇÃO E CANCELAMENTO -->
+                                                @if($agendamentoPrincipal->status === 'agendado')
                                                     <div style="margin-top: auto; display: flex; gap: 4px; align-items: flex-end; padding-bottom: 4px;">
-                                                        <button onclick="window.location.href='{{ route('agendamentos.mostrar-finalizar', $agendamentoPrincipal) }}'" 
+                                                        <button onclick="window.location.href='{{ route('agendamentos.concluir', $agendamentoPrincipal) }}'" 
                                                                 style="flex: 1; background: #2563eb; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
                                                             FATURAR
                                                         </button>
+                                                        <form action="{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}" method="POST" onsubmit="return confirm('Cancelar?')" style="flex: 1; margin: 0;">
+                                                            @csrf
+                                                            <button type="submit" 
+                                                                    style="width: 100%; background: #ef4444; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+                                                                CANCELAR
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                @elseif($agendamentoPrincipal->status === 'pre_concluido')
+                                                    <div style="margin-top: auto; display: flex; gap: 4px; align-items: flex-end; padding-bottom: 4px;">
+                                                        @if(auth()->user()->isProprietaria())
+                                                            <form action="{{ route('agendamentos.confirmar', $agendamentoPrincipal) }}" method="POST" onsubmit="return confirm('Confirmar conclusão?')" style="flex: 1; margin: 0;">
+                                                                @csrf
+                                                                <button type="submit" 
+                                                                        style="width: 100%; background: #10b981; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+                                                                    CONFIRMAR
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                        <form action="{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}" method="POST" onsubmit="return confirm('Cancelar?')" style="flex: 1; margin: 0;">
+                                                            @csrf
+                                                            <button type="submit" 
+                                                                    style="width: 100%; background: #ef4444; color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+                                                                CANCELAR
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                @elseif($agendamentoPrincipal->status === 'concluido' && auth()->user()->isProprietaria())
+                                                    <div style="margin-top: auto; display: flex; gap: 4px; align-items: flex-end; padding-bottom: 4px;">
                                                         <form action="{{ route('agendamentos.cancelar', $agendamentoPrincipal) }}" method="POST" onsubmit="return confirm('Cancelar?')" style="flex: 1; margin: 0;">
                                                             @csrf
                                                             <button type="submit" 

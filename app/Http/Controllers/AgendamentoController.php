@@ -19,7 +19,8 @@ class AgendamentoController extends Controller
         $data = $request->input('data', today());
 
         $query = Agendamento::with(['profissional.user', 'servicos', 'cliente'])
-            ->whereDate('data_hora', $data);
+            ->whereDate('data_hora', $data)
+            ->where('status', '!=', 'cancelado');
 
         if ($profissionalId) {
             $query->where('profissional_id', $profissionalId);
@@ -28,7 +29,7 @@ class AgendamentoController extends Controller
         $agendamentos = $query->orderBy('data_hora')->get();
         $profissionais = Profissional::where('ativo', true)->get();
 
-        return view('agendamentos.index', compact('agendamentos', 'profissionais', 'data', 'profissionalId'));
+        return view('agendamentos.agenda', compact('agendamentos', 'profissionais', 'data', 'profissionalId'));
     }
 
     public function agenda(Request $request)
@@ -45,7 +46,8 @@ class AgendamentoController extends Controller
         $data = $request->input('data', today());
 
         $query = Agendamento::with(['profissional.user', 'servicos', 'cliente'])
-            ->whereDate('data_hora', $data);
+            ->whereDate('data_hora', $data)
+            ->where('status', '!=', 'cancelado');
 
         if ($profissionalId) {
             $query->where('profissional_id', $profissionalId);
@@ -173,6 +175,11 @@ class AgendamentoController extends Controller
             ->with('success', 'Agendamento atualizado com sucesso!');
     }
 
+    public function cancelar(Agendamento $agendamento)
+    {
+        return $this->destroy($agendamento);
+    }
+
     public function destroy(Agendamento $agendamento)
     {
         $user = auth()->user();
@@ -251,45 +258,6 @@ class AgendamentoController extends Controller
         }
         
         return view('admin.finalizar-agendamento', compact('agendamento'));
-    }
-
-    // Faturamento rápido
-    public function faturamentoRapido(Agendamento $agendamento)
-    {
-        // Verificar permissões
-        $user = auth()->user();
-        if (!$user->isProprietaria() && !$user->isAdmin()) {
-            return redirect()->route('agendamentos.agenda')
-                ->with('error', 'Você não tem permissão para faturar');
-        }
-        
-        return view('agendamentos.faturamento-rapido', compact('agendamento'));
-    }
-
-    // Processar faturamento rápido
-    public function finalizarPagamentoRapido(Request $request, Agendamento $agendamento)
-    {
-        $request->validate([
-            'forma_pagamento' => 'required|string|in:pix,dinheiro,debito,credito',
-            'valor' => 'required|numeric|min:0',
-        ]);
-
-        // Atualizar status
-        $agendamento->status = 'concluido';
-        $agendamento->save();
-
-        // Criar pagamento
-        $pagamento = \App\Models\Pagamento::create([
-            'agendamento_id' => $agendamento->id,
-            'valor' => $request->valor,
-            'valor_empresa' => $request->valor,
-            'forma_pagamento' => $request->forma_pagamento,
-            'status' => 'pago',
-            'data_pagamento' => now(),
-            'observacoes' => 'Pagamento rápido'
-        ]);
-
-        return response()->json(['success' => true]);
     }
 
     public function concluir(Agendamento $agendamento)

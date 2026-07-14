@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Profissional;
 use App\Models\Agendamento;
 use App\Models\FormaPagamento;
@@ -143,41 +144,50 @@ class AdminAgendaController extends Controller
         $desconto = $request->desconto ?? 0;
         $valorFinal = max(0, $valorTotal - $desconto);
 
-        // Atualizar status do agendamento
-        $agendamento->status = 'concluido';
-        $agendamento->observacoes_finalizacao = $request->observacoes_finalizacao;
-        $agendamento->save();
+        DB::beginTransaction();
 
-        // Se for pacote, usar um serviço do pacote
-        if ($isPacote && $agendamento->cliente) {
-            $agendamento->cliente->usePackageService();
-        }
+        try {
+            $agendamento->status = 'concluido';
+            $agendamento->observacoes_finalizacao = $request->observacoes_finalizacao;
+            $agendamento->save();
 
-        // Criar registro de pagamento
-        if ($valorFinal > 0) {
-            $formaPagamento = FormaPagamento::whereRaw('LOWER(nome) = ?', [strtolower($request->forma_pagamento)])->first();
-            if (! $formaPagamento) {
-                return response()->json(['error' => 'Forma de pagamento inválida'], 400);
+            // Se for pacote, usar um serviço do pacote
+            if ($isPacote && $agendamento->cliente) {
+                $agendamento->cliente->usePackageService();
             }
 
-            $profissional = $agendamento->profissional;
-            $valoresPagamento = Pagamento::calcularValores($valorFinal, $formaPagamento, $profissional, 0);
+            // Criar registro de pagamento
+            if ($valorFinal > 0) {
+                $formaPagamento = FormaPagamento::whereRaw('LOWER(nome) = ?', [strtolower($request->forma_pagamento)])->first();
+                if (! $formaPagamento) {
+                    DB::rollBack();
+                    return response()->json(['error' => 'Forma de pagamento inválida'], 400);
+                }
 
-            $pagamento = Pagamento::create(array_merge(
-                [
-                    'agendamento_id' => $agendamento->id,
-                    'forma_pagamento_id' => $formaPagamento->id,
-                ],
-                $valoresPagamento
-            ));
+                $profissional = $agendamento->profissional;
+                $valoresPagamento = Pagamento::calcularValores($valorFinal, $formaPagamento, $profissional, 0);
+
+                Pagamento::create(array_merge(
+                    [
+                        'agendamento_id' => $agendamento->id,
+                        'forma_pagamento_id' => $formaPagamento->id,
+                    ],
+                    $valoresPagamento
+                ));
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Atendimento finalizado com sucesso',
+                'valor_final' => $valorFinal,
+                'foi_pacote' => $isPacote
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Erro ao finalizar o atendimento: ' . $e->getMessage()], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Atendimento finalizado com sucesso',
-            'valor_final' => $valorFinal,
-            'foi_pacote' => $isPacote
-        ]);
     }
 
     // Mostrar página de finalização

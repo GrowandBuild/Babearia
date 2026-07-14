@@ -49,6 +49,10 @@
                             Serviços
                         </x-nav-link>
                         
+                        <x-nav-link :href="route('admin.banners.index')" :active="request()->routeIs('admin.banners.*')">
+                            🖼️ Banners
+                        </x-nav-link>
+                        
                         <x-nav-link :href="route('backup.index')" :active="request()->routeIs('backup.*')">
                             💾 Backup
                         </x-nav-link>

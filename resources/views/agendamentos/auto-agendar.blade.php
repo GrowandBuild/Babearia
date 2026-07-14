@@ -7,27 +7,55 @@
 <!-- Banner Principal - Fora do main para aparecer logo abaixo do header -->
 @section('banner')
 @php
-    $bannerPath = \App\Models\Setting::get('site.banner');
-    $bannerUrl = \App\Models\Setting::get('site.banner_url');
+    $banner = \App\Models\Banner::getAtivo();
+    $isMobile = request()->header('User-Agent') && preg_match('/Mobile|Android|iPhone/', request()->header('User-Agent'));
 @endphp
 
-<div style="width: 100%; height: 250px; position: relative; overflow: hidden; background: linear-gradient(45deg, #667eea, #764ba2);">
-    
-    @if($bannerUrl)
-        <!-- Banner via URL externa -->
-        <img src="{{ $bannerUrl }}" 
-             alt="Banner" 
-             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6));"></div>
-    @elseif($bannerPath)
-        <!-- Banner com imagem personalizada -->
-        <img src="{{ asset('storage/' . $bannerPath) }}" 
-             alt="Banner" 
-             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6));"></div>
+<div style="width: 100%; position: relative; overflow: hidden; background: linear-gradient(45deg, #667eea, #764ba2);">
+    @if($banner)
+        <!-- Mostrar banner responsivo -->
+        <div style="display: flex; align-items: center; justify-content: center;">
+            @if($isMobile && $banner->banner_mobile)
+                <!-- Banner Mobile -->
+                <img src="{{ $banner->getUrlBanner(true) }}" 
+                     alt="Banner" 
+                     style="width: 100%; height: auto; display: block; max-height: 60vh; object-fit: cover;">
+            @elseif($banner->banner_desktop)
+                <!-- Banner Desktop -->
+                <img src="{{ $banner->getUrlBanner(false) }}" 
+                     alt="Banner" 
+                     style="width: 100%; height: 250px; display: block; object-fit: cover;">
+            @endif
+        </div>
+        @if($banner->link_destino)
+            <a href="{{ $banner->link_destino }}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></a>
+        @endif
+    @else
+        <!-- Fallback para banners antigos -->
+        @php
+            $bannerPath = \App\Models\Setting::get('site.banner');
+            $bannerUrl = \App\Models\Setting::get('site.banner_url');
+        @endphp
+
+        <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+            @if($bannerUrl)
+                <img src="{{ $bannerUrl }}" 
+                     alt="Banner" 
+                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block;">
+            @elseif($bannerPath)
+                <img src="{{ asset('storage/' . $bannerPath) }}" 
+                     alt="Banner" 
+                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block;">
+            @endif
+        </div>
     @endif
     
-    <div class="absolute inset-0 flex items-center justify-center">
+    <!-- Overlay e Texto -->
+    @unless($banner)
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6));"></div>
+    @endunless
+    
+    <div class="absolute inset-0 flex items-center justify-center" @if($banner) style="display: none;" @endif>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             <div class="text-center">
                 <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 animate-fade-in drop-shadow-lg">
@@ -41,10 +69,12 @@
         </div>
     </div>
     
-    <!-- Elementos decorativos -->
-    <div class="absolute top-4 right-4 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
-    <div class="absolute bottom-4 left-4 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-    <div class="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full blur-lg"></div>
+    <!-- Elementos decorativos (apenas se não tiver banner) -->
+    @unless($banner)
+        <div class="absolute top-4 right-4 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+        <div class="absolute bottom-4 left-4 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+        <div class="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full blur-lg"></div>
+    @endunless
 </div>
 @endsection
 
